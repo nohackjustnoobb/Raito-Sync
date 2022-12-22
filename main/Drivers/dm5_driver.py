@@ -5,8 +5,7 @@ import js2py
 import aiohttp
 import asyncio
 
-
-from .driver import Episodes, BaseDriver, BaseDriverData
+from .driver import Episodes, BaseDriver, BaseDriverData, get
 from .manga import Manga, SimpleManga
 
 
@@ -62,77 +61,73 @@ class DM5(BaseDriver):
     @staticmethod
     def get_details(ids: list):
         async def extract_details(session, id):
-            async with session.get(
-                f"https://www.dm5.com/manhua-{id}/",
-            ) as resp:
-                soup = BeautifulSoup(await resp.text(), "lxml")
-                info = soup.find("div", class_="info")
+            text = get(session, f"https://www.dm5.com/manhua-{id}/")
 
-                title = (
-                    info.find("p", class_="title")
-                    .find(text=True, recursive=False)
-                    .strip()
-                )
-                author = [
-                    i.text.strip()
-                    for i in info.find("p", class_="subtitle").find_all("a")
-                ]
-                description = (
-                    info.find("p", class_="content")
-                    .text.replace("[+展开]", "")
-                    .replace("[-折叠]", "")
-                    .strip()
-                )
-                thumbnail = soup.find("div", "cover").find("img")["src"]
+            soup = BeautifulSoup(text, "lxml")
+            info = soup.find("div", class_="info")
 
-                tip = info.find("p", class_="tip")
-                is_end = tip.find("span", class_="").text != "连载中"
-                categories = [
-                    DM5.categories[i["href"][8:-1]]
-                    for i in tip.find_all("a")
-                    if i["href"][8:-1] in DM5.categories.keys()
-                ]
+            title = (
+                info.find("p", class_="title").find(text=True, recursive=False).strip()
+            )
+            author = [
+                i.text.strip() for i in info.find("p", class_="subtitle").find_all("a")
+            ]
+            description = (
+                info.find("p", class_="content")
+                .text.replace("[+展开]", "")
+                .replace("[-折叠]", "")
+                .strip()
+            )
+            thumbnail = soup.find("div", "cover").find("img")["src"]
 
-                def extract_episode(raw):
-                    try:
-                        episodes = []
-                        episodes_urls = []
-                        for i in raw.findChildren("a"):
-                            title = i.find(text=True, recursive=False).strip()
-                            episodes.append(title)
-                            episodes_urls.append(i["href"])
-                        return episodes, episodes_urls
-                    except:
-                        return [], []
+            tip = info.find("p", class_="tip")
+            is_end = tip.find("span", class_="").text != "连载中"
+            categories = [
+                DM5.categories[i["href"][8:-1]]
+                for i in tip.find_all("a")
+                if i["href"][8:-1] in DM5.categories.keys()
+            ]
 
-                serial, episodes_urls = extract_episode(
-                    soup.find("ul", id="detail-list-select-1")
-                )
+            def extract_episode(raw):
+                try:
+                    episodes = []
+                    episodes_urls = []
+                    for i in raw.findChildren("a"):
+                        title = i.find(text=True, recursive=False).strip()
+                        episodes.append(title)
+                        episodes_urls.append(i["href"])
+                    return episodes, episodes_urls
+                except:
+                    return [], []
 
-                extra = []
-                extra_id = ("detail-list-select-2", "detail-list-select-3")
-                for i in extra_id:
-                    raw = soup.find("ul", id=i)
-                    if raw:
-                        result = extract_episode(raw)
-                        extra.extend(result[0])
-                        episodes_urls.extend(result[1])
+            serial, episodes_urls = extract_episode(
+                soup.find("ul", id="detail-list-select-1")
+            )
 
-                return Manga(
-                    driver=DM5,
-                    driver_data=DM5Data(
-                        episodes_urls=episodes_urls,
-                        serial_len=len(serial),
-                    ),
-                    id=id,
-                    episodes=Episodes(serial=serial, extra=extra),
-                    thumbnail=thumbnail,
-                    title=title,
-                    author=author,
-                    description=description,
-                    is_end=is_end,
-                    categories=categories,
-                )
+            extra = []
+            extra_id = ("detail-list-select-2", "detail-list-select-3")
+            for i in extra_id:
+                raw = soup.find("ul", id=i)
+                if raw:
+                    result = extract_episode(raw)
+                    extra.extend(result[0])
+                    episodes_urls.extend(result[1])
+
+            return Manga(
+                driver=DM5,
+                driver_data=DM5Data(
+                    episodes_urls=episodes_urls,
+                    serial_len=len(serial),
+                ),
+                id=id,
+                episodes=Episodes(serial=serial, extra=extra),
+                thumbnail=thumbnail,
+                title=title,
+                author=author,
+                description=description,
+                is_end=is_end,
+                categories=categories,
+            )
 
         async def fetch_details():
             async with aiohttp.ClientSession(

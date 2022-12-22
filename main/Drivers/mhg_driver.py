@@ -5,7 +5,7 @@ import asyncio
 from bs4 import BeautifulSoup
 import base64
 
-from .driver import Episodes, BaseDriver, BaseDriverData
+from .driver import Episodes, BaseDriver, BaseDriverData, get as cget
 from .manga import Manga, SimpleManga
 
 
@@ -65,65 +65,68 @@ class MHG(BaseDriver):
 
     @staticmethod
     def get_details(ids: list):
+        if len(ids) > 6:
+            length = len(ids)
+            return MHG.get_details(ids[: length // 2]) + MHG.get_details(
+                ids[length // 2 :]
+            )
+
         async def extract_details(session, id):
-            async with session.get(
-                f"https://www.manhuagui.com/comic/{id}/",
-            ) as resp:
-                soup = BeautifulSoup(await resp.text(), "lxml")
-                thumbnail = soup.find("p", class_="hcover")
-                is_end = "finish" in thumbnail.find_all("span")[-1]["class"]
-                thumbnail = "https:" + thumbnail.find("img")["src"]
-                title = soup.find("div", class_="book-title").find("h1").text.strip()
-                info = soup.find("ul", class_="detail-list cf").find_all("li")
-                categories = [
-                    MHG.categories[i["href"][6:-1]]
-                    for i in info[1].find("span").find_all("a")
-                    if i["href"][6:-1] in MHG.categories.keys()
-                ]
-                author = [
-                    i.text.strip() for i in info[1].find_all("span")[1].find_all("a")
-                ]
-                description = soup.find("div", id="intro-cut").text.strip()
+            text = cget(session, f"https://www.manhuagui.com/comic/{id}/")
 
-                chapter_list = soup.find_all("div", class_="chapter-list")
+            soup = BeautifulSoup(text, "lxml")
+            thumbnail = soup.find("p", class_="hcover")
+            is_end = "finish" in thumbnail.find_all("span")[-1]["class"]
+            thumbnail = "https:" + thumbnail.find("img")["src"]
+            title = soup.find("div", class_="book-title").find("h1").text.strip()
+            info = soup.find("ul", class_="detail-list cf").find_all("li")
+            categories = [
+                MHG.categories[i["href"][6:-1]]
+                for i in info[1].find("span").find_all("a")
+                if i["href"][6:-1] in MHG.categories.keys()
+            ]
+            author = [i.text.strip() for i in info[1].find_all("span")[1].find_all("a")]
+            description = soup.find("div", id="intro-cut").text.strip()
 
-                def extract_episode(raw):
-                    try:
-                        episodes = {}
-                        for i in raw.find_all("ul"):
-                            temp_dict = {}
-                            for j in i.find_all("a"):
-                                temp_dict[j["title"].strip()] = j["href"].replace(
-                                    id, ""
-                                )[8:-5]
-                            episodes = {**temp_dict, **episodes}
-                        return list(episodes.keys()), list(episodes.values())
-                    except:
-                        return [], []
+            chapter_list = soup.find_all("div", class_="chapter-list")
 
-                serial, episodes_ids = extract_episode(chapter_list[0])
-                extra = []
-                for i in chapter_list[1:]:
-                    result = extract_episode(i)
-                    extra.extend(result[0])
-                    episodes_ids.extend(result[1])
+            def extract_episode(raw):
+                try:
+                    episodes = {}
+                    for i in raw.find_all("ul"):
+                        temp_dict = {}
+                        for j in i.find_all("a"):
+                            temp_dict[j["title"].strip()] = j["href"].replace(id, "")[
+                                8:-5
+                            ]
+                        episodes = {**temp_dict, **episodes}
+                    return list(episodes.keys()), list(episodes.values())
+                except:
+                    return [], []
 
-                return Manga(
-                    driver=MHG,
-                    driver_data=MHGData(
-                        manga_id=id,
-                        episodes_ids=episodes_ids,
-                        serial_len=len(serial),
-                    ),
-                    id=id,
-                    episodes=Episodes(serial=serial, extra=extra),
-                    thumbnail=thumbnail,
-                    title=title,
-                    author=author,
-                    description=description,
-                    is_end=is_end,
-                    categories=categories,
-                )
+            serial, episodes_ids = extract_episode(chapter_list[0])
+            extra = []
+            for i in chapter_list[1:]:
+                result = extract_episode(i)
+                extra.extend(result[0])
+                episodes_ids.extend(result[1])
+
+            return Manga(
+                driver=MHG,
+                driver_data=MHGData(
+                    manga_id=id,
+                    episodes_ids=episodes_ids,
+                    serial_len=len(serial),
+                ),
+                id=id,
+                episodes=Episodes(serial=serial, extra=extra),
+                thumbnail=thumbnail,
+                title=title,
+                author=author,
+                description=description,
+                is_end=is_end,
+                categories=categories,
+            )
 
         async def fetch_details():
             async with aiohttp.ClientSession() as session:

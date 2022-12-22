@@ -1,9 +1,15 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from .Drivers.dm5_driver import DM5
 from .Drivers.mhg_driver import MHG
+
+
+cache_time = 5 * 60
 
 
 class BetterMangaApp:
@@ -95,6 +101,7 @@ def get_response(status, body=None):
 
 
 class List(APIView):
+    @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             parameters = request.query_params
@@ -109,6 +116,7 @@ class List(APIView):
 
 
 class Recommendation(APIView):
+    @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             parameters = request.query_params
@@ -121,6 +129,7 @@ class Recommendation(APIView):
 
 
 class Categories(APIView):
+    @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             parameters = request.query_params
@@ -131,8 +140,8 @@ class Categories(APIView):
 
 
 class Details(APIView):
+    @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
-
         try:
             parameters = request.query_params
             ids = parameters["ids"].split(",")
@@ -149,6 +158,7 @@ class Details(APIView):
 
 
 class Search(APIView):
+    @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             parameters = request.query_params
