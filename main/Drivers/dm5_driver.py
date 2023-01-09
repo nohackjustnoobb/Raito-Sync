@@ -56,7 +56,7 @@ class DM5(BaseDriver):
         "list-tag61": Manga.categories_list[21],
     }
     supported_categories = list(categories.values())
-    support_recommendation = True
+    support_suggestion = True
 
     @staticmethod
     def get_details(ids: list):
@@ -202,7 +202,7 @@ class DM5(BaseDriver):
         return result
 
     @staticmethod
-    def get_recommendation(text):
+    def get_suggestion(text):
         response = requests.get(
             f"https://www.dm5.com/search.ashx?t={text}/",
             headers={"Accept-Language": "en-US,en;q=0.5"},

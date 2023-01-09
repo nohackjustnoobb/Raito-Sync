@@ -61,7 +61,7 @@ class MHG(BaseDriver):
         "weiniang": Manga.categories_list[21],
     }
     supported_categories = list(categories.values())
-    support_recommendation = False
+    support_suggestion = False
 
     @staticmethod
     def get_details(ids: list):

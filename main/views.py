@@ -57,12 +57,10 @@ class BetterMangaApp:
         return driver.get_episode(episode, is_extra, data) if driver else None
 
     @staticmethod
-    def get_recommendation(driver_id: str, text: str):
+    def get_suggestion(driver_id: str, text: str):
         driver = BetterMangaApp.get_driver(id=driver_id)
         return (
-            driver.get_recommendation(text)
-            if driver and driver.support_recommendation
-            else []
+            driver.get_suggestion(text) if driver and driver.support_suggestion else []
         )
 
     @staticmethod
@@ -80,7 +78,7 @@ class BetterMangaApp:
         return (
             {
                 "categories": driver.supported_categories,
-                "recommendation": driver.support_recommendation,
+                "suggestion": driver.support_suggestion,
             }
             if driver
             else None
@@ -115,12 +113,12 @@ class List(APIView):
             return get_response(status.HTTP_400_BAD_REQUEST)
 
 
-class Recommendation(APIView):
+class Suggestion(APIView):
     @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             parameters = request.query_params
-            response = BetterMangaApp.get_recommendation(
+            response = BetterMangaApp.get_suggestion(
                 parameters["driver"], parameters["text"]
             )
             return get_response(status.HTTP_200_OK, response)
@@ -129,7 +127,6 @@ class Recommendation(APIView):
 
 
 class Categories(APIView):
-    @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             parameters = request.query_params
@@ -180,7 +177,7 @@ class Episode(APIView):
             response = BetterMangaApp.get_episode(
                 driver,
                 int(parameters["episode"]),
-                parameters["is_extra"] if parameters.get("is_extra") else 0,
+                parameters["is_extra"] == "1" if parameters.get("is_extra") else False,
                 request.data,
             )
             return get_response(status.HTTP_200_OK, response)

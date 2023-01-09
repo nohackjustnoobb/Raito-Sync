@@ -53,7 +53,7 @@ class BaseDriverData:
 class BaseDriver:
     identifier = None
     supported_categories = None
-    support_recommendation = None
+    support_suggestion = None
 
     @staticmethod
     def get_details(ids: list):
