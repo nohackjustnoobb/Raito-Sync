@@ -5,8 +5,9 @@ import asyncio
 from bs4 import BeautifulSoup
 import base64
 
-from .driver import Episodes, BaseDriver, BaseDriverData, get as cget
+from .driver import Episodes, BaseDriver, BaseDriverData
 from .manga import Manga, SimpleManga
+from .util import get as cget
 
 
 @dataclass
@@ -225,6 +226,10 @@ class MHG(BaseDriver):
         )
         soup = BeautifulSoup(response.text, "lxml")
 
+        current = soup.find("span", class_="current")
+        if (not current and page != 1) or (current and int(current.text) != page):
+            return []
+
         result = []
         for i in soup.find_all("li", class_="cf"):
             details = i.find("a")
@@ -267,6 +272,7 @@ class MHG(BaseDriver):
 import re, json, lzstring
 
 lz = lzstring.LZString()
+
 
 # get.py
 def get(url):

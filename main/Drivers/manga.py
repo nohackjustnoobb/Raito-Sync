@@ -24,7 +24,7 @@ class SimpleManga:
             "title": self.title,
             "thumbnail": self.thumbnail,
             "latest": self.latest,
-            "is_end": self.is_end,
+            "isEnd": self.is_end,
             "author": self.author,
         }
 
@@ -76,12 +76,12 @@ class Manga:
             "id": self.id,
             "title": self.title,
             "thumbnail": self.thumbnail,
-            "is_end": self.is_end,
+            "isEnd": self.is_end,
             "author": self.author,
             "categories": self.categories,
             "episodes": self.episodes.dict,
             "description": self.description,
-            "driver_data": self.driver_data.compressed,
+            "driverData": self.driver_data.compressed,
         }
 
     @property

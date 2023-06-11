@@ -31,9 +31,14 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+CORS_ALLOWED_ORIGINS = []
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 SECURE_SSL_REDIRECT = False
 
 # Application definition
+AUTH_USER_MODEL = "user.User"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -42,8 +47,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "rest_framework",
+    "rest_framework.authtoken",
     "main.apps.MainConfig",
+    "user.apps.UserConfig",
 ]
 
 MIDDLEWARE = [
@@ -54,6 +62,9 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "Better_Manga_Server.middleware.serverInfoMiddleware",
 ]
 
 ROOT_URLCONF = "Better_Manga_Server.urls"
@@ -110,7 +121,12 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     "DEFAULT_PARSER_CLASSES": [
         "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
         "Better_Manga_Server.plainTextParser.PlainTextParser",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
 }
 

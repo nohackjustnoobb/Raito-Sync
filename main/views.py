@@ -13,7 +13,7 @@ cache_time = 5 * 60
 
 
 class BetterMangaApp:
-    version = "Beta"
+    version = "Development"
     available_drivers = [DM5, MHG]
 
     @staticmethod
@@ -85,32 +85,19 @@ class BetterMangaApp:
         )
 
 
-def get_response(status, body=None):
-    app_details = BetterMangaApp.get_app_details()
-    return Response(
-        body,
-        status=status,
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Expose-Headers": ", ".join(app_details.keys()),
-            **app_details,
-        },
-    )
-
-
 class List(APIView):
     @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             parameters = request.query_params
             response = BetterMangaApp.get_list(
-                parameters["driver"],
-                parameters["category"] if parameters.get("category") else None,
-                int(parameters["page"]) if parameters.get("page") else None,
+                parameters["d"],
+                parameters["c"] if parameters.get("c") else None,
+                int(parameters["p"]) if parameters.get("p") else None,
             )
-            return get_response(status.HTTP_200_OK, response)
+            return Response(response, status=status.HTTP_200_OK)
         except:
-            return get_response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class Suggestion(APIView):
@@ -118,22 +105,20 @@ class Suggestion(APIView):
     def get(self, request, format=None):
         try:
             parameters = request.query_params
-            response = BetterMangaApp.get_suggestion(
-                parameters["driver"], parameters["text"]
-            )
-            return get_response(status.HTTP_200_OK, response)
+            response = BetterMangaApp.get_suggestion(parameters["d"], parameters["k"])
+            return Response(response, status=status.HTTP_200_OK)
         except:
-            return get_response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class Categories(APIView):
     def get(self, request, format=None):
         try:
             parameters = request.query_params
-            response = BetterMangaApp.get_categories(parameters["driver"])
-            return get_response(status.HTTP_200_OK, response)
+            response = BetterMangaApp.get_categories(parameters["d"])
+            return Response(response, status=status.HTTP_200_OK)
         except:
-            return get_response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class Details(APIView):
@@ -141,17 +126,15 @@ class Details(APIView):
     def get(self, request, format=None):
         try:
             parameters = request.query_params
-            ids = parameters["ids"].split(",")
+            ids = parameters["i"].split(",")
             response = BetterMangaApp.get_details(
-                parameters["driver"],
+                parameters["d"],
                 ids,
-                int(parameters["show_all"]) == 1
-                if parameters.get("show_all")
-                else False,
+                int(parameters["sa"]) == 1 if parameters.get("sa") else False,
             )
-            return get_response(status.HTTP_200_OK, response)
+            return Response(response, status=status.HTTP_200_OK)
         except:
-            return get_response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class Search(APIView):
@@ -160,26 +143,26 @@ class Search(APIView):
         try:
             parameters = request.query_params
             response = BetterMangaApp.search(
-                parameters["driver"],
-                parameters["text"],
-                int(parameters["page"]) if parameters.get("page") else 1,
+                parameters["d"],
+                parameters["k"],
+                int(parameters["p"]) if parameters.get("p") else 1,
             )
-            return get_response(status.HTTP_200_OK, response)
+            return Response(response, status=status.HTTP_200_OK)
         except:
-            return get_response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class Episode(APIView):
     def post(self, request, format=None):
         try:
             parameters = request.query_params
-            driver = BetterMangaApp.get_driver(id=parameters["driver"])
+            driver = BetterMangaApp.get_driver(id=parameters["d"])
             response = BetterMangaApp.get_episode(
                 driver,
-                int(parameters["episode"]),
-                parameters["is_extra"] == "1" if parameters.get("is_extra") else False,
+                int(parameters["e"]),
+                parameters["ie"] == "1" if parameters.get("ie") else False,
                 request.data,
             )
-            return get_response(status.HTTP_200_OK, response)
+            return Response(response, status=status.HTTP_200_OK)
         except:
-            return get_response(status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)

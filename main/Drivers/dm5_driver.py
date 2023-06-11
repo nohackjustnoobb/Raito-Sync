@@ -4,9 +4,11 @@ from bs4 import BeautifulSoup
 import js2py
 import aiohttp
 import asyncio
+import chinese_converter
 
-from .driver import Episodes, BaseDriver, BaseDriverData, get
+from .driver import Episodes, BaseDriver, BaseDriverData
 from .manga import Manga, SimpleManga
+from .util import get
 
 
 @dataclass
@@ -204,7 +206,7 @@ class DM5(BaseDriver):
     @staticmethod
     def get_suggestion(text):
         response = requests.get(
-            f"https://www.dm5.com/search.ashx?t={text}/",
+            f"https://www.dm5.com/search.ashx?t={chinese_converter.to_simplified(text)}/",
             headers={"Accept-Language": "en-US,en;q=0.5"},
         )
         soup = BeautifulSoup(response.text, "lxml")
@@ -214,7 +216,7 @@ class DM5(BaseDriver):
     @staticmethod
     def search(text, page=1):
         response = requests.get(
-            f"https://www.dm5.com/search?title={text}&page={page}",
+            f"https://www.dm5.com/search?title={chinese_converter.to_simplified(text)}&page={page}",
             headers={"Accept-Language": "en-US,en;q=0.5"},
         )
         soup = BeautifulSoup(response.text, "lxml")
