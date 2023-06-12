@@ -4,3 +4,5 @@ db.sqlite3
 
 **/__init__.py
 **/migrations/
+
+.DS_Store
