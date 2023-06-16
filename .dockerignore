@@ -6,4 +6,6 @@ db.sqlite3
 **/migrations/
 
 .DS_Store
+
+dockerfile
 docker-compose.yml
