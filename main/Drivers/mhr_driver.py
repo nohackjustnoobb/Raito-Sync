@@ -8,8 +8,8 @@ import asyncio
 import aiohttp
 import chinese_converter
 
-from classes.driver import Episodes, BaseDriver, BaseDriverData
-from classes.manga import Manga, SimpleManga
+from .classes.driver import Episodes, BaseDriver, BaseDriverData
+from .classes.manga import Manga, SimpleManga
 
 
 @dataclass
