@@ -5,8 +5,8 @@ import asyncio
 from bs4 import BeautifulSoup
 import base64
 
-from .driver import Episodes, BaseDriver, BaseDriverData
-from .manga import Manga, SimpleManga
+from .classes.driver import Episodes, BaseDriver, BaseDriverData
+from .classes.manga import Manga, SimpleManga
 from .util import get as cget
 
 
@@ -59,13 +59,13 @@ class MHG(BaseDriver):
         "lishi": Manga.categories_list[16],
         "jingji": Manga.categories_list[18],
         "jizhan": Manga.categories_list[20],
-        "weiniang": Manga.categories_list[21],
+        "weiniang": Manga.categories_list[22],
     }
     supported_categories = list(categories.values())
     support_suggestion = False
 
     @staticmethod
-    def get_details(ids: list):
+    def get_details(ids: list, show_all: bool):
         if len(ids) > 6:
             length = len(ids)
             return MHG.get_details(ids[: length // 2]) + MHG.get_details(
@@ -112,7 +112,7 @@ class MHG(BaseDriver):
                 extra.extend(result[0])
                 episodes_ids.extend(result[1])
 
-            return Manga(
+            manga = Manga(
                 driver=MHG,
                 driver_data=MHGData(
                     manga_id=id,
@@ -128,6 +128,8 @@ class MHG(BaseDriver):
                 is_end=is_end,
                 categories=categories,
             )
+
+            return manga if show_all else manga.to_simple
 
         async def fetch_details():
             async with aiohttp.ClientSession() as session:

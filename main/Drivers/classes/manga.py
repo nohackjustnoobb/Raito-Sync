@@ -92,7 +92,11 @@ class Manga:
             title=self.title,
             thumbnail=self.thumbnail,
             is_end=self.is_end,
-            latest=self.episodes.serial[0] if len(self.episodes.serial) else None,
+            latest=self.episodes.serial[0]
+            if len(self.episodes.serial)
+            else self.episodes.extra[0]
+            if len(self.episodes.extra)
+            else None,
             author=self.author,
         )
 

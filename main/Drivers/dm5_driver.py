@@ -6,8 +6,8 @@ import aiohttp
 import asyncio
 import chinese_converter
 
-from .driver import Episodes, BaseDriver, BaseDriverData
-from .manga import Manga, SimpleManga
+from .classes.driver import Episodes, BaseDriver, BaseDriverData
+from .classes.manga import Manga, SimpleManga
 from .util import get
 
 
@@ -61,7 +61,7 @@ class DM5(BaseDriver):
     support_suggestion = True
 
     @staticmethod
-    def get_details(ids: list):
+    def get_details(ids: list, show_all: bool):
         async def extract_details(session, id):
             text = get(session, f"https://www.dm5.com/manhua-{id}/")
 
@@ -115,7 +115,7 @@ class DM5(BaseDriver):
                     extra.extend(result[0])
                     episodes_urls.extend(result[1])
 
-            return Manga(
+            manga = Manga(
                 driver=DM5,
                 driver_data=DM5Data(
                     episodes_urls=episodes_urls,
@@ -130,6 +130,8 @@ class DM5(BaseDriver):
                 is_end=is_end,
                 categories=categories,
             )
+
+            return manga if show_all else manga.to_simple
 
         async def fetch_details():
             async with aiohttp.ClientSession(

@@ -52,7 +52,7 @@ class BaseDriver:
     support_suggestion = None
 
     @staticmethod
-    def get_details(ids: list):
+    def get_details(ids: list, show_all: bool):
         pass
 
     @staticmethod
