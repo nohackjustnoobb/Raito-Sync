@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken import views
 from main.views import List, Suggestion, Categories, Details, Search, Episode
-from user.views import MyInfo, Collections, Histories
+from user.views import MyInfo, Collections, Histories, Clear, Create
 
 urlpatterns = [
     path("admin", admin.site.urls),
@@ -28,6 +28,8 @@ urlpatterns = [
     path("categories", Categories.as_view()),
     path("details", Details.as_view()),
     path("user/me", MyInfo.as_view()),
+    path("user/clear", Clear.as_view()),
+    path("user/create", Create.as_view()),
     path("user/collections", Collections.as_view()),
     path("user/histories", Histories.as_view()),
     path("user/token", views.obtain_auth_token),

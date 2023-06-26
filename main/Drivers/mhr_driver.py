@@ -164,7 +164,7 @@ class MHR(BaseDriver):
 
         return SimpleManga(
             driver=MHR,
-            id=data["mangaId"],
+            id=str(data["mangaId"]),
             title=data["mangaName"],
             thumbnail=data["mangaCoverimageUrl"],
             is_end=bool(data["mangaIsOver"]),
@@ -262,9 +262,9 @@ class MHR(BaseDriver):
                         driver_data=MHRData(
                             episodes_ids=episodes_ids,
                             serial_len=len(serial),
-                            manga_id=response["mangaId"],
+                            manga_id=str(response["mangaId"]),
                         ),
-                        id=response["mangaId"],
+                        id=str(response["mangaId"]),
                         title=response["mangaName"],
                         episodes=Episodes(serial=serial, extra=extra),
                         thumbnail=response["mangaPicimageUrl"],
