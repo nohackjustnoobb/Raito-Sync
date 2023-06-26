@@ -97,6 +97,10 @@ class MHR(BaseDriver):
     supported_categories = list(categories.values())
     support_suggestion = True
 
+    headers = {
+        "X-Yq-Yqci": '{"av":"1.3.8","cy":"HK","lut":"1662458886867","nettype":1,"os":2,"di":"733A83F2FD3B554C3C4E4D46A307D560A52861C7","fcl":"appstore","fult":"1662458886867","cl":"appstore","pi":"","token":"","fut":"1662458886867","le":"en-HK","ps":"1","ov":"16.4","at":2,"rn":"1668x2388","ln":"","pt":"com.CaricatureManGroup.CaricatureManGroup","dm":"iPad8,6"}'
+    }
+
     @staticmethod
     def hashGETQuery(map):
         def addObj(map, sb, obj):
@@ -198,7 +202,7 @@ class MHR(BaseDriver):
         response = requests.get(
             "https://hkmangaapi.manhuaren.com/v2/manga/getCategoryMangas?"
             + urllib.parse.urlencode(query),
-            headers={"X-Yq-Yqci": '{"rn":"1080x1920","le":"tw"}'},
+            headers=MHR.headers,
         ).json()
 
         try:
@@ -274,9 +278,7 @@ class MHR(BaseDriver):
                         categories=categories,
                     )
 
-                async with aiohttp.ClientSession(
-                    headers={"X-Yq-Yqci": '{"rn":"1080x1920","le":"tw"}'}
-                ) as session:
+                async with aiohttp.ClientSession(headers=MHR.headers) as session:
                     manga = []
                     for i in ids:
                         manga.append(asyncio.ensure_future(extract_details(session, i)))
@@ -301,7 +303,7 @@ class MHR(BaseDriver):
                 "https://hkmangaapi.manhuaren.com/v2/manga/getBatchDetail?"
                 + urllib.parse.urlencode(query),
                 json=body,
-                headers={"X-Yq-Yqci": '{"rn":"1080x1920","le":"tw"}'},
+                headers=MHR.headers,
             ).json()
 
             manga = response["response"]["mangas"]
@@ -329,7 +331,7 @@ class MHR(BaseDriver):
         response = requests.get(
             "https://hkmangaapi.manhuaren.com/v1/manga/getRead?"
             + urllib.parse.urlencode(query),
-            headers={"X-Yq-Yqci": '{"rn":"1080x1920","le":"tw"}'},
+            headers=MHR.headers,
         ).json()["response"]
 
         base_url = response["hostList"][0]
@@ -345,13 +347,15 @@ class MHR(BaseDriver):
         query = {
             "keywords": chinese_converter.to_simplified(text),
             "gak": "android_manhuaren2",
+            "mh_is_anonymous": "0",
         }
 
         query["gsn"] = MHR.hashGETQuery(query)
 
         response = requests.get(
             "https://hkmangaapi.manhuaren.com/v1/search/getKeywordMatch?"
-            + urllib.parse.urlencode(query)
+            + urllib.parse.urlencode(query),
+            headers=MHR.headers,
         ).json()["response"]["items"]
 
         result = []
@@ -372,7 +376,8 @@ class MHR(BaseDriver):
 
         response = requests.get(
             "https://hkmangaapi.manhuaren.com/v1/search/getSearchManga?"
-            + urllib.parse.urlencode(query)
+            + urllib.parse.urlencode(query),
+            headers=MHR.headers,
         ).json()["response"]
 
         ids = []
