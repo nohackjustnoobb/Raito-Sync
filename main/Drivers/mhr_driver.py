@@ -275,6 +275,7 @@ class MHR(BaseDriver):
                         is_end=bool(response["mangaIsOver"]),
                         author=response["mangaAuthors"],
                         description=response["mangaIntro"],
+                        latest=response["mangaNewsectionName"],
                         categories=categories,
                     )
 

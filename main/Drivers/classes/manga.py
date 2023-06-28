@@ -68,6 +68,7 @@ class Manga:
     episodes: Episodes
     driver: BaseDriver
     driver_data: BaseDriverData
+    latest: str = None
 
     @property
     def dict(self):
@@ -82,6 +83,7 @@ class Manga:
             "episodes": self.episodes.dict,
             "description": self.description,
             "driverData": self.driver_data.compressed,
+            "latest": self.latest,
         }
 
     @property
@@ -92,7 +94,9 @@ class Manga:
             title=self.title,
             thumbnail=self.thumbnail,
             is_end=self.is_end,
-            latest=self.episodes.serial[0]
+            latest=self.latest
+            if self.latest
+            else self.episodes.serial[0]
             if len(self.episodes.serial)
             else self.episodes.extra[0]
             if len(self.episodes.extra)
