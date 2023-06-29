@@ -72,6 +72,7 @@ class MHR(BaseDriver):
     categoriesText = {
         "热血": 31,
         "恋爱": 26,
+        "爱情": 26,
         "校园": 1,
         "百合": 3,
         "彩虹": 27,
@@ -196,6 +197,8 @@ class MHR(BaseDriver):
             "subCategoryId": str(category),
             "sort": "0",
             "gak": "android_manhuaren2",
+            "gft": "json",
+            "gui": "462099841",
         }
         query["gsn"] = MHR.hashGETQuery(query)
 
@@ -223,6 +226,8 @@ class MHR(BaseDriver):
                     query = {
                         "mangaId": str(id),
                         "gak": "android_manhuaren2",
+                        "gft": "json",
+                        "gui": "462099841",
                     }
 
                     query["gsn"] = MHR.hashGETQuery(query)
@@ -289,6 +294,8 @@ class MHR(BaseDriver):
         else:
             query = {
                 "gak": "android_manhuaren2",
+                "gft": "json",
+                "gui": "462099841",
             }
 
             body = {
@@ -325,6 +332,8 @@ class MHR(BaseDriver):
             "loadreal": "1",
             "imageQuality": "2",
             "gak": "android_manhuaren2",
+            "gft": "json",
+            "gui": "462099841",
         }
 
         query["gsn"] = MHR.hashGETQuery(query)
@@ -348,6 +357,8 @@ class MHR(BaseDriver):
         query = {
             "keywords": chinese_converter.to_simplified(text),
             "gak": "android_manhuaren2",
+            "gft": "json",
+            "gui": "462099841",
             "mh_is_anonymous": "0",
         }
 
@@ -371,6 +382,8 @@ class MHR(BaseDriver):
             "start": str((page - 1) * 50),
             "limit": "50",
             "gak": "android_manhuaren2",
+            "gft": "json",
+            "gui": "462099841",
         }
 
         query["gsn"] = MHR.hashGETQuery(query)
