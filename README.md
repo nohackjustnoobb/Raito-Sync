@@ -10,6 +10,11 @@ In order to run the server, it is essential to create a `.env` file that include
 
 ```
 SECRET_KEY=<SECRET KEY>
+
+# optional
+# key required to create new accounts
+# leave blank to allow everyone to create new accounts
+REGISTER_KEY=<REGISTER_KEY>
 ```
 
 ### Running with Docker
