@@ -225,7 +225,9 @@ class MHR(BaseDriver):
                 async def extract_details(session, id):
                     query = {
                         "mangaId": str(id),
+                        "mangaDetailVersion": "",
                         "gak": "android_manhuaren2",
+                        "gaui": "462099841",
                         "gft": "json",
                         "gui": "462099841",
                     }
@@ -296,6 +298,7 @@ class MHR(BaseDriver):
                 "gak": "android_manhuaren2",
                 "gft": "json",
                 "gui": "462099841",
+                "gaui": "462099841",
             }
 
             body = {
@@ -334,6 +337,7 @@ class MHR(BaseDriver):
             "gak": "android_manhuaren2",
             "gft": "json",
             "gui": "462099841",
+            "gaui": "462099841",
         }
 
         query["gsn"] = MHR.hashGETQuery(query)
@@ -359,6 +363,7 @@ class MHR(BaseDriver):
             "gak": "android_manhuaren2",
             "gft": "json",
             "gui": "462099841",
+            "gaui": "462099841",
             "mh_is_anonymous": "0",
         }
 
@@ -382,6 +387,7 @@ class MHR(BaseDriver):
             "start": str((page - 1) * 50),
             "limit": "50",
             "gak": "android_manhuaren2",
+            "gaui": "462099841",
             "gft": "json",
             "gui": "462099841",
         }
