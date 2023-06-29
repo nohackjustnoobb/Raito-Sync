@@ -9,7 +9,7 @@ class DriverNotFound(Exception):
 
 
 class BetterMangaApp:
-    version = "Beta v0.1.2"
+    version = "Beta v0.1.3"
     available_drivers = [MHR, DM5, MHG]
 
     @staticmethod
