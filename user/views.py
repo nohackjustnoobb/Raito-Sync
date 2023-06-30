@@ -20,11 +20,17 @@ class MyInfo(APIView):
             old_pw = request.data["oldPassword"]
             new_pw = request.data["newPassword"]
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": '"oldPassword" or "newPassword" are missing.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # check old password
-        if not old_pw or not new_pw or not request.user.check_password(old_pw):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.check_password(old_pw):
+            return Response(
+                {"error": 'Incorrect "oldPassword".'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # set new password
         request.user.set_password(new_pw)
@@ -41,11 +47,15 @@ class Clear(APIView):
         try:
             pw = request.data["password"]
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": '"password" is missing.'}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         # check password
-        if not pw or not request.user.check_password(pw):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if not request.user.check_password(pw):
+            return Response(
+                {"error": "Incorrect password."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
         request.user.collections.all().delete()
         request.user.history.all().delete()
@@ -58,21 +68,31 @@ class Create(APIView):
 
     def post(self, request, format=None):
         try:
-            pw = request.data.get("password")
-            un = request.data.get("username")
-            key = request.data.get("key")
+            pw = request.data["password"]
+            un = request.data["username"]
+            key = request.data["key"]
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": '"username", "password", or "key" are missing.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         REGISTER_KEY = os.getenv("REGISTER_KEY")
-
-        if not pw or not un or (REGISTER_KEY and REGISTER_KEY != key):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        if REGISTER_KEY and REGISTER_KEY != key:
+            return Response(
+                {"error", "Register Key is not matching."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             user = User.objects.create_user(email=un, password=pw)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": "An error occurred when creating a user. Check if the username is unique."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         serializer = UserSerializers(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -103,18 +123,24 @@ class Collections(APIView):
                         request.user.collections.add(manga)
             return Response(status=status.HTTP_201_CREATED)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An unexpected error occurred when syncing the collections."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def delete(self, request, format=None):
         try:
             # try to delete the manga
             Manga.objects.get(
-                id=request.query_params.get("i"),
-                driver=request.query_params.get("d"),
+                id=request.query_params.get("id"),
+                driver=request.query_params.get("driver"),
             ).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Manga.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "The responding manga was not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class Histories(APIView):
@@ -154,4 +180,7 @@ class Histories(APIView):
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An unexpected error occurred when syncing the histories."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

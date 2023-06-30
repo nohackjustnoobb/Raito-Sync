@@ -18,92 +18,158 @@ class List(APIView):
     @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
-            parameters = request.query_params
-            response = BetterMangaApp.get_list(
-                parameters["d"],
-                parameters["c"] if parameters.get("c") else None,
-                int(parameters["p"]) if parameters.get("p") else None,
-            )
+            try:
+                parameters = request.query_params
+                driver = parameters["driver"]
+                category = parameters.get("driver")
+                page = parameters.get("page")
+                if page:
+                    page = int(page)
+            except:
+                return Response(
+                    {"error": '"driver" is missing.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            response = BetterMangaApp.get_list(driver, category, page)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An unexpected error occurred when trying to get list."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class Suggestion(APIView):
     @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
-            parameters = request.query_params
-            response = BetterMangaApp.get_suggestion(parameters["d"], parameters["k"])
+            try:
+                parameters = request.query_params
+                driver = parameters["driver"]
+                keyword = parameters["keyword"]
+            except:
+                return Response(
+                    {"error": '"driver" or "keyword" are missing.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            response = BetterMangaApp.get_suggestion(driver, keyword)
             return Response(response, status=status.HTTP_200_OK)
+
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": "An unexpected error occurred when trying to get suggestions."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class Categories(APIView):
     def get(self, request, format=None):
         try:
-            parameters = request.query_params
-            response = BetterMangaApp.get_categories(parameters["d"])
+            try:
+                driver = request.query_params["driver"]
+            except:
+                Response(
+                    {"error": '"driver" is missing.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            response = BetterMangaApp.get_categories(driver)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": "An unexpected error occurred when trying to get categories."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class Details(APIView):
     @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
-            parameters = request.query_params
-            ids = parameters["i"].split(",")
-            response = BetterMangaApp.get_details(
-                parameters["d"],
-                ids,
-                int(parameters["sa"]) == 1 if parameters.get("sa") else False,
-            )
+            try:
+                parameters = request.query_params
+                driver = parameters["driver"]
+                ids = parameters["ids"].split(",")
+                show_all = bool(int(parameters.get("show-all", "0")))
+            except:
+                return Response(
+                    {"error": '"driver" or "ids" are missing.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            response = BetterMangaApp.get_details(driver, ids, show_all)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An unexpected error occurred when trying to get details."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class Search(APIView):
     @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
-            parameters = request.query_params
-            response = BetterMangaApp.search(
-                parameters["d"],
-                parameters["k"],
-                int(parameters["p"]) if parameters.get("p") else 1,
-            )
+            try:
+                parameters = request.query_params
+                driver = parameters["driver"]
+                keyword = parameters["keyword"]
+                page = int(parameters.get("page", "1"))
+            except:
+                return Response(
+                    {"error": '"driver" or "keyword" are missing.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            response = BetterMangaApp.search(driver, keyword, page)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "An unexpected error occurred when trying to search manga."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class Episode(APIView):
     def post(self, request, format=None):
         try:
-            parameters = request.query_params
-            driver = BetterMangaApp.get_driver(id=parameters["d"])
+            try:
+                parameters = request.query_params
+                driver = parameters["driver"]
+                episode = int(parameters["episode"])
+                is_extra = bool(int(parameters.get("is-extra", "0")))
+            except:
+                return Response(
+                    {"error": '"driver" or "episode" are missing.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             response = BetterMangaApp.get_episode(
-                driver,
-                int(parameters["e"]),
-                parameters["ie"] == "1" if parameters.get("ie") else False,
-                request.data,
+                driver, episode, is_extra, request.data
             )
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {
+                    "error": "An error occurred when trying to get episodes. Check if you included the manga data in the body."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )

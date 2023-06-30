@@ -1,4 +1,5 @@
 from main.views import BetterMangaApp
+from django.conf import settings
 
 
 class serverInfoMiddleware:
@@ -7,12 +8,14 @@ class serverInfoMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        app_details = BetterMangaApp.get_app_details()
         response.headers = {
             **response.headers,
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Expose-Headers": ", ".join(app_details.keys()),
-            **app_details,
+            "Access-Control-Expose-Headers": "Version, Available-Drivers",
+            "Version": settings.VERSION,
+            "Available-Drivers": ", ".join(
+                map(lambda x: x.identifier, BetterMangaApp.available_drivers),
+            ),
         }
 
         return response

@@ -9,7 +9,6 @@ class DriverNotFound(Exception):
 
 
 class BetterMangaApp:
-    version = "Beta v0.1.4"
     available_drivers = [MHR, DM5, MHG]
 
     @staticmethod
@@ -51,7 +50,8 @@ class BetterMangaApp:
         )
 
     @staticmethod
-    def get_episode(driver: str, episode: int, is_extra: bool, data: str):
+    def get_episode(driver_id: str, episode: int, is_extra: bool, data: str):
+        driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
 
@@ -63,15 +63,6 @@ class BetterMangaApp:
         if not driver:
             raise DriverNotFound
         return driver.get_suggestion(text) if driver.support_suggestion else []
-
-    @staticmethod
-    def get_app_details():
-        return {
-            "Version": BetterMangaApp.version,
-            "Available-Drivers": ", ".join(
-                map(lambda x: x.identifier, BetterMangaApp.available_drivers),
-            ),
-        }
 
     @staticmethod
     def get_categories(driver_id: str):
