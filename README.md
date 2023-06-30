@@ -6,7 +6,7 @@ Better Manga App / Server is an open-source project aimed at simplifying the pro
 
 In order to run the server, it is essential to create a `.env` file that includes the SECRET KEY of the server. An example of the `.env` file is shown below:
 
-`env`
+`.env`
 
 ```
 SECRET_KEY=<SECRET KEY>
