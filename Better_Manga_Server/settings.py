@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG") == "True" or True
+DEBUG = os.getenv("DEBUG") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -159,4 +159,4 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-VERSION = "Beta v0.2.4"
+VERSION = "Beta v0.2.5"

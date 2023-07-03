@@ -95,7 +95,6 @@ class Categories(APIView):
 
 
 class Details(APIView):
-    @method_decorator(cache_page(cache_time))
     def get(self, request, format=None):
         try:
             try:

@@ -163,6 +163,10 @@ class MHR(BaseDriver):
         return hash
 
     @staticmethod
+    def change_to_faster_source(url):
+        return url.replace("cdndm5.com", "cdnmanhua.net")
+
+    @staticmethod
     def convert_to_simple(data):
         author = re.split("，| |  ", data["mangaAuthor"])
         author = [s for s in author if s]
@@ -171,7 +175,7 @@ class MHR(BaseDriver):
             driver=MHR,
             id=str(data["mangaId"]),
             title=data["mangaName"],
-            thumbnail=data["mangaCoverimageUrl"],
+            thumbnail=MHR.change_to_faster_source(data["mangaCoverimageUrl"]),
             is_end=bool(data["mangaIsOver"]),
             latest=data["mangaNewestContent"]
             if data.get("mangaNewestContent")
@@ -278,7 +282,9 @@ class MHR(BaseDriver):
                         id=str(response["mangaId"]),
                         title=response["mangaName"],
                         episodes=Episodes(serial=serial, extra=extra),
-                        thumbnail=response["mangaPicimageUrl"],
+                        thumbnail=MHR.change_to_faster_source(
+                            response["mangaPicimageUrl"]
+                        ),
                         is_end=bool(response["mangaIsOver"]),
                         author=response["mangaAuthors"],
                         description=response["mangaIntro"],
@@ -321,6 +327,7 @@ class MHR(BaseDriver):
             result = []
             for i in manga:
                 result.append(MHR.convert_to_simple(i))
+
             return result
 
     @staticmethod
