@@ -17,4 +17,4 @@ class MangaSerializers(serializers.ModelSerializer):
 class HistorySerializers(serializers.ModelSerializer):
     class Meta:
         model = History
-        exclude = ["_id"]
+        exclude = ["_id", "update_datetime"]

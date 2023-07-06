@@ -11,6 +11,7 @@ class Manga(models.Model):
 
 class History(models.Model):
     _id = models.AutoField(primary_key=True, editable=False)
+    update_datetime = models.DateTimeField(auto_now=True)
     id = models.TextField()
     driver = models.TextField()
     title = models.TextField()

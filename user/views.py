@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
+from datetime import datetime
 
 from .serializers import UserSerializers, MangaSerializers, HistorySerializers
 from .models import Manga, History as HistoryModel, User
@@ -171,7 +172,9 @@ class Histories(APIView):
 
             date = request.query_params.get("date")
             serializer = HistorySerializers(
-                request.user.history.filter(datetime__gte=int(date))
+                request.user.history.filter(
+                    update_datetime__gte=datetime.fromtimestamp(int(date) / 1e3)
+                )
                 if date
                 else request.user.history,
                 many=True,
