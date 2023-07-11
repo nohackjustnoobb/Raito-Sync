@@ -21,7 +21,7 @@ class List(APIView):
             try:
                 parameters = request.query_params
                 driver = parameters["driver"]
-                category = parameters.get("driver")
+                category = parameters.get("category")
                 page = parameters.get("page")
                 if page:
                     page = int(page)
