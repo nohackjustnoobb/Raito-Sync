@@ -81,7 +81,7 @@ class Categories(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            response = BetterMangaApp.get_categories(driver)
+            response = BetterMangaApp.get_info(driver)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)

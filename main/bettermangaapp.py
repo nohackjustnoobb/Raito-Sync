@@ -65,11 +65,12 @@ class BetterMangaApp:
         return driver.get_suggestion(text) if driver.support_suggestion else []
 
     @staticmethod
-    def get_categories(driver_id: str):
+    def get_info(driver_id: str):
         driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
         return {
             "categories": driver.supported_categories,
             "suggestion": driver.support_suggestion,
+            "recommendedChunkSize": driver.recommended_chunk_size,
         }

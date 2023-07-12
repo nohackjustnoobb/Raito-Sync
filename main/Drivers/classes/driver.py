@@ -47,9 +47,10 @@ class BaseDriverData:
 
 
 class BaseDriver:
-    identifier = None
-    supported_categories = None
-    support_suggestion = None
+    identifier = ""
+    supported_categories = []
+    support_suggestion = False
+    recommended_chunk_size = 0
 
     @staticmethod
     def get_details(ids: list, show_all: bool):

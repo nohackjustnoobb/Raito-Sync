@@ -59,6 +59,7 @@ class DM5(BaseDriver):
     }
     supported_categories = list(categories.values())
     support_suggestion = True
+    recommended_chunk_size = 10
 
     @staticmethod
     def get_details(ids: list, show_all: bool):

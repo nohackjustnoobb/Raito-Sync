@@ -63,6 +63,7 @@ class MHG(BaseDriver):
     }
     supported_categories = list(categories.values())
     support_suggestion = False
+    recommended_chunk_size = 5
 
     @staticmethod
     def get_details(ids: list, show_all: bool):
