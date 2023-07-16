@@ -70,7 +70,7 @@ class Suggestion(APIView):
             )
 
 
-class Categories(APIView):
+class Drivers(APIView):
     def get(self, request, format=None):
         try:
             try:
@@ -87,9 +87,7 @@ class Categories(APIView):
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
             return Response(
-                {
-                    "error": "An unexpected error occurred when trying to get categories."
-                },
+                {"error": "An unexpected error occurred when trying to get driver."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

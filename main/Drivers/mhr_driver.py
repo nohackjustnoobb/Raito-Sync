@@ -368,7 +368,7 @@ class MHR(BaseDriver):
     @staticmethod
     def get_suggestion(text):
         query = {
-            "keywords": chinese_converter.to_simplified(text),
+            "keywords": chinese_converter.to_simplified(text.replace("/", "")),
             "gak": "android_manhuaren2",
             "gft": "json",
             "gui": "462099841",
@@ -392,7 +392,7 @@ class MHR(BaseDriver):
 
     def search(text, page=1):
         query = {
-            "keywords": chinese_converter.to_simplified(text),
+            "keywords": chinese_converter.to_simplified(text.replace("/", "")),
             "start": str((page - 1) * 50),
             "limit": "50",
             "gak": "android_manhuaren2",
