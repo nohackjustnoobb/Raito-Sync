@@ -23,7 +23,7 @@ The easiest way to get started with the server is by running it as a Docker cont
 
 1. Create `docker-compose.yml`
 
-The following file is an example of what the two aforementioned files should resemble or look like.
+The following file is an example of what the files should resemble or look like.
 
 `docker-compose.yml`
 
@@ -48,27 +48,18 @@ services:
 The following command will pull the docker image and start the server.
 
 ```
-sudo docker-compose up
+sudo docker-compose up -d
 ```
 
 ### Manual Setup
 
 Make sure that you have python installed.
 
-1. Clone the repository
-
-```
+```bash
+# 1. Clone the repository
+# 2. Install the dependencies
+# 3. Start the server
 git clone https://github.com/nohackjustnoobb/Better-Manga-Server
-```
-
-2. Install the dependencies
-
-```
 cd Better-Manga-Server && pip install -r requirements.txt
-```
-
-3. Start the server
-
-```
 uwsgi --ini uwsgi.ini
 ```

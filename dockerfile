@@ -1,7 +1,8 @@
-FROM python:3.9
+FROM python:3.9-alpine
 
 WORKDIR /app
 
+RUN apk add python3-dev build-base linux-headers pcre-dev
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && pip install -r requirements.txt
