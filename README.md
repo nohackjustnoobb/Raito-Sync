@@ -19,7 +19,7 @@ REGISTER_KEY=<REGISTER_KEY>
 
 ### Running with Docker
 
-The easiest way to get started with the server is by running it as a Docker container.
+The easiest way to start with the server is by running it as a Docker container.
 
 1. Create `docker-compose.yml`
 
@@ -53,7 +53,7 @@ sudo docker-compose up -d
 
 ### Manual Setup
 
-Make sure that you have python installed.
+Make sure that you have Python installed.
 
 ```bash
 # 1. Clone the repository
