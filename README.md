@@ -1,6 +1,6 @@
 # Better Manga Server
 
-Better Manga App / Server is an open-source project aimed at simplifying the process of reading manga. The project comprises two parts: front-end and back-end. This repository contains the back-end component of the project. The front-end interface can be found in the following repository: [Better-Manga-App](https://github.com/nohackjustnoobb/Better-Manga-App).
+Better Manga App is an open-source project aimed at simplifying the process of reading manga. The project comprises two parts: front-end and back-end. This repository contains the back-end component of the project. The front-end interface can be found in the following repository: [Better-Manga-Web-Client](https://github.com/nohackjustnoobb/Better-Manga-Web-Client).
 
 ## Quick Start
 
