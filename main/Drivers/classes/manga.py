@@ -39,7 +39,7 @@ class Manga:
         "BL",
         "Adventure",
         "Harem",
-        "Sci-Fi",
+        "SciFi",
         "War",
         "Suspense",
         "Speculation",
@@ -49,12 +49,12 @@ class Manga:
         "Horror",
         "Ghosts",
         "History",
-        "Fan-Fi",
+        "FanFi",
         "Sports",
         "Hentai",
         "Mecha",
         "Restricted",
-        "Cross-Dressing",
+        "CrossDressing",
     ]
 
     driver: str
