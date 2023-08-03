@@ -70,7 +70,7 @@ class BetterMangaApp:
         if not driver:
             raise DriverNotFound
         return {
-            "categories": driver.supported_categories,
-            "suggestion": driver.support_suggestion,
+            "supportedCategories": driver.supported_categories,
+            "supportSuggestion": driver.support_suggestion,
             "recommendedChunkSize": driver.recommended_chunk_size,
         }
