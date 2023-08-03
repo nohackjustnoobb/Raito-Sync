@@ -5,7 +5,7 @@ import lzma
 
 
 @dataclass
-class Episodes:
+class Chapters:
     serial: list
     extra: list
 
@@ -61,7 +61,7 @@ class BaseDriver:
         pass
 
     @staticmethod
-    def get_episode(episode: int, is_extra: bool, data: BaseDriverData):
+    def get_chapter(chapter: int, is_extra: bool, data: BaseDriverData):
         pass
 
     @staticmethod

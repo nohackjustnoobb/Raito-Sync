@@ -6,24 +6,24 @@ import aiohttp
 import asyncio
 import chinese_converter
 
-from .classes.driver import Episodes, BaseDriver, BaseDriverData
+from .classes.driver import Chapters, BaseDriver, BaseDriverData
 from .classes.manga import Manga, SimpleManga
 from .util import get
 
 
 @dataclass
 class DM5Data(BaseDriverData):
-    episodes_urls: list
+    chapters_urls: list
     serial_len: int
 
     @property
     def dict(self):
-        return {"episodes_urls": self.episodes_urls, "serial_len": self.serial_len}
+        return {"chapters_urls": self.chapters_urls, "serial_len": self.serial_len}
 
     @staticmethod
     def from_dict(dict):
         return DM5Data(
-            episodes_urls=dict["episodes_urls"], serial_len=dict["serial_len"]
+            chapters_urls=dict["chapters_urls"], serial_len=dict["serial_len"]
         )
 
     @staticmethod
@@ -91,19 +91,19 @@ class DM5(BaseDriver):
                 if i["href"][8:-1] in DM5.categories.keys()
             ]
 
-            def extract_episode(raw):
+            def extract_chapter(raw):
                 try:
-                    episodes = []
-                    episodes_urls = []
+                    chapters = []
+                    chapters_urls = []
                     for i in raw.findChildren("a"):
                         title = i.find(text=True, recursive=False).strip()
-                        episodes.append(title)
-                        episodes_urls.append(i["href"])
-                    return episodes, episodes_urls
+                        chapters.append(title)
+                        chapters_urls.append(i["href"])
+                    return chapters, chapters_urls
                 except:
                     return [], []
 
-            serial, episodes_urls = extract_episode(
+            serial, chapters_urls = extract_chapter(
                 soup.find("ul", id="detail-list-select-1")
             )
 
@@ -112,18 +112,18 @@ class DM5(BaseDriver):
             for i in extra_id:
                 raw = soup.find("ul", id=i)
                 if raw:
-                    result = extract_episode(raw)
+                    result = extract_chapter(raw)
                     extra.extend(result[0])
-                    episodes_urls.extend(result[1])
+                    chapters_urls.extend(result[1])
 
             manga = Manga(
                 driver=DM5,
                 driver_data=DM5Data(
-                    episodes_urls=episodes_urls,
+                    chapters_urls=chapters_urls,
                     serial_len=len(serial),
                 ),
                 id=id,
-                episodes=Episodes(serial=serial, extra=extra),
+                chapters=Chapters(serial=serial, extra=extra),
                 thumbnail=thumbnail,
                 title=title,
                 author=author,
@@ -166,9 +166,9 @@ class DM5(BaseDriver):
         )
 
     @staticmethod
-    def get_episode(episode: int, is_extra: bool, data: str):
+    def get_chapter(chapter: int, is_extra: bool, data: str):
         data = DM5Data.from_compressed(data)
-        url = data.episodes_urls[episode + (data.serial_len if is_extra else 0)]
+        url = data.chapters_urls[chapter + (data.serial_len if is_extra else 0)]
         body = requests.get(
             f"https://www.manhuaren.com/{url}/",
             headers={"Accept-Language": "en-US,en;q=0.5"},

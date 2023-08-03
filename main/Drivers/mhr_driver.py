@@ -8,23 +8,23 @@ import asyncio
 import aiohttp
 import chinese_converter
 
-from .classes.driver import Episodes, BaseDriver, BaseDriverData
+from .classes.driver import Chapters, BaseDriver, BaseDriverData
 from .classes.manga import Manga, SimpleManga
 
 
 @dataclass
 class MHRData(BaseDriverData):
     manga_id: str
-    episodes_ids: list
+    chapters_ids: list
     serial_len: int
 
-    def get_episode_ids(self, episode, is_extra):
-        return self.episodes_ids[episode + self.serial_len if is_extra else episode]
+    def get_chapter_ids(self, chapter, is_extra):
+        return self.chapters_ids[chapter + self.serial_len if is_extra else chapter]
 
     @property
     def dict(self):
         return {
-            "episodes_urls": self.episodes_ids,
+            "chapters_urls": self.chapters_ids,
             "serial_len": self.serial_len,
             "manga_id": self.manga_id,
         }
@@ -32,7 +32,7 @@ class MHRData(BaseDriverData):
     @staticmethod
     def from_dict(dict):
         return MHRData(
-            episodes_ids=dict["episodes_urls"],
+            chapters_ids=dict["chapters_urls"],
             serial_len=dict["serial_len"],
             manga_id=dict["manga_id"],
         )
@@ -249,23 +249,23 @@ class MHR(BaseDriver):
                         ).json()
                     )["response"]
 
-                    def extract_episode(raw):
-                        episodes = []
-                        episodes_ids = []
+                    def extract_chapter(raw):
+                        chapters = []
+                        chapters_ids = []
 
                         for i in raw:
-                            episodes.append(i["sectionName"])
-                            episodes_ids.append(i["sectionId"])
-                        return episodes, episodes_ids
+                            chapters.append(i["sectionName"])
+                            chapters_ids.append(i["sectionId"])
+                        return chapters, chapters_ids
 
-                    serial, episodes_ids = extract_episode(response["mangaWords"])
+                    serial, chapters_ids = extract_chapter(response["mangaWords"])
 
-                    extra, temp = extract_episode(response["mangaRolls"])
-                    episodes_ids.extend(temp)
+                    extra, temp = extract_chapter(response["mangaRolls"])
+                    chapters_ids.extend(temp)
 
-                    temp, temp2 = extract_episode(response["mangaEpisode"])
+                    temp, temp2 = extract_chapter(response["mangaEpisode"])
                     extra.extend(temp)
-                    episodes_ids.extend(temp2)
+                    chapters_ids.extend(temp2)
 
                     categoriesText = response["mangaTheme"]
                     categories = []
@@ -277,13 +277,13 @@ class MHR(BaseDriver):
                     return Manga(
                         driver=MHR,
                         driver_data=MHRData(
-                            episodes_ids=episodes_ids,
+                            chapters_ids=chapters_ids,
                             serial_len=len(serial),
                             manga_id=str(response["mangaId"]),
                         ),
                         id=str(response["mangaId"]),
                         title=response["mangaName"],
-                        episodes=Episodes(serial=serial, extra=extra),
+                        chapters=Chapters(serial=serial, extra=extra),
                         thumbnail=MHR.change_to_faster_source(
                             response["mangaPicimageUrl"]
                         ),
@@ -333,9 +333,9 @@ class MHR(BaseDriver):
             return result
 
     @staticmethod
-    def get_episode(episode: int, is_extra: bool, data: str):
+    def get_chapter(chapter: int, is_extra: bool, data: str):
         data_obj = MHRData.from_compressed(data)
-        section_ids = data_obj.get_episode_ids(episode, is_extra)
+        section_ids = data_obj.get_chapter_ids(chapter, is_extra)
 
         query = {
             "mangaSectionId": str(section_ids),

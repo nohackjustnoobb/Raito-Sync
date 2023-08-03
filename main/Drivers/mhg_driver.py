@@ -5,21 +5,21 @@ import asyncio
 from bs4 import BeautifulSoup
 import base64
 
-from .classes.driver import Episodes, BaseDriver, BaseDriverData
+from .classes.driver import Chapters, BaseDriver, BaseDriverData
 from .classes.manga import Manga, SimpleManga
 from .util import get as cget
 
 
 @dataclass
 class MHGData(BaseDriverData):
-    episodes_ids: list
+    chapters_ids: list
     serial_len: int
     manga_id: str
 
     @property
     def dict(self):
         return {
-            "episodes_ids": self.episodes_ids,
+            "chapters_ids": self.chapters_ids,
             "serial_len": self.serial_len,
             "manga_id": self.manga_id,
         }
@@ -27,7 +27,7 @@ class MHGData(BaseDriverData):
     @staticmethod
     def from_dict(dict):
         return MHGData(
-            episodes_ids=dict["episodes_ids"],
+            chapters_ids=dict["chapters_ids"],
             serial_len=dict["serial_len"],
             manga_id=dict["manga_id"],
         )
@@ -92,36 +92,36 @@ class MHG(BaseDriver):
 
             chapter_list = soup.find_all("div", class_="chapter-list")
 
-            def extract_episode(raw):
+            def extract_chapter(raw):
                 try:
-                    episodes = {}
+                    chapters = {}
                     for i in raw.find_all("ul"):
                         temp_dict = {}
                         for j in i.find_all("a"):
                             temp_dict[j["title"].strip()] = j["href"].replace(id, "")[
                                 8:-5
                             ]
-                        episodes = {**temp_dict, **episodes}
-                    return list(episodes.keys()), list(episodes.values())
+                        chapters = {**temp_dict, **chapters}
+                    return list(chapters.keys()), list(chapters.values())
                 except:
                     return [], []
 
-            serial, episodes_ids = extract_episode(chapter_list[0])
+            serial, chapters_ids = extract_chapter(chapter_list[0])
             extra = []
             for i in chapter_list[1:]:
-                result = extract_episode(i)
+                result = extract_chapter(i)
                 extra.extend(result[0])
-                episodes_ids.extend(result[1])
+                chapters_ids.extend(result[1])
 
             manga = Manga(
                 driver=MHG,
                 driver_data=MHGData(
                     manga_id=id,
-                    episodes_ids=episodes_ids,
+                    chapters_ids=chapters_ids,
                     serial_len=len(serial),
                 ),
                 id=id,
-                episodes=Episodes(serial=serial, extra=extra),
+                chapters=Chapters(serial=serial, extra=extra),
                 thumbnail=thumbnail,
                 title=title,
                 author=author,
@@ -142,9 +142,9 @@ class MHG(BaseDriver):
         return asyncio.run(fetch_details())
 
     @staticmethod
-    def get_episode(episode: int, is_extra: bool, data: str):
+    def get_chapter(chapter: int, is_extra: bool, data: str):
         data = MHGData.from_compressed(data)
-        id = data.episodes_ids[episode + (data.serial_len if is_extra else 0)]
+        id = data.chapters_ids[chapter + (data.serial_len if is_extra else 0)]
         details = get(f"https://www.manhuagui.com/comic/{data.manga_id}/{id}.html")
         urls = list(
             map(

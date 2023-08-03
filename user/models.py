@@ -19,7 +19,7 @@ class History(models.Model):
     latest = models.TextField()
     datetime = models.IntegerField()
     new = models.BooleanField()
-    episode = models.TextField(null=True)
+    chapter = models.TextField(null=True)
     page = models.IntegerField(null=True)
     isExtra = models.BooleanField(null=True)
 

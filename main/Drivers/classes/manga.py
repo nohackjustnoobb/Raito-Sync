@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .driver import BaseDriverData, BaseDriver, Episodes
+from .driver import BaseDriverData, BaseDriver, Chapters
 
 
 @dataclass
@@ -65,7 +65,7 @@ class Manga:
     description: str
     is_end: bool
     categories: tuple
-    episodes: Episodes
+    chapters: Chapters
     driver: BaseDriver
     driver_data: BaseDriverData
     latest: str = None
@@ -80,7 +80,7 @@ class Manga:
             "isEnd": self.is_end,
             "author": self.author,
             "categories": self.categories,
-            "episodes": self.episodes.dict,
+            "chapters": self.chapters.dict,
             "description": self.description,
             "driverData": self.driver_data.compressed,
             "latest": self.latest,
@@ -96,10 +96,10 @@ class Manga:
             is_end=self.is_end,
             latest=self.latest
             if self.latest
-            else self.episodes.serial[0]
-            if len(self.episodes.serial)
-            else self.episodes.extra[0]
-            if len(self.episodes.extra)
+            else self.chapters.serial[0]
+            if len(self.chapters.serial)
+            else self.chapters.extra[0]
+            if len(self.chapters.extra)
             else None,
             author=self.author,
         )
@@ -108,5 +108,5 @@ class Manga:
     def simple_dict(self):
         return self.to_simple.dict
 
-    def get_episode(self, episode: int, is_extra: bool = False):
-        return self.driver.get_episode(episode, is_extra, self.driver_data)
+    def get_chapter(self, chapter: int, is_extra: bool = False):
+        return self.driver.get_chapter(chapter, is_extra, self.driver_data)

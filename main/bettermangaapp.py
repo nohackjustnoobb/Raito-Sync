@@ -50,12 +50,12 @@ class BetterMangaApp:
         )
 
     @staticmethod
-    def get_episode(driver_id: str, episode: int, is_extra: bool, data: str):
+    def get_chapter(driver_id: str, chapter: int, is_extra: bool, data: str):
         driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
 
-        return driver.get_episode(episode, is_extra, data)
+        return driver.get_chapter(chapter, is_extra, data)
 
     @staticmethod
     def get_suggestion(driver_id: str, text: str):
