@@ -51,19 +51,20 @@ class BaseDriver:
     supported_categories = []
     support_suggestion = False
     recommended_chunk_size = 0
+    proxy_settings = {}
 
     @staticmethod
-    def get_details(ids: list, show_all: bool):
+    def get_details(ids: list, show_all: bool, proxy: bool):
         pass
 
     @staticmethod
-    def search(text: str, page: int):
+    def search(text: str, page: int, proxy: bool):
         pass
 
     @staticmethod
-    def get_chapter(chapter: int, is_extra: bool, data: BaseDriverData):
+    def get_chapter(chapter: int, is_extra: bool, data: BaseDriverData, proxy: bool):
         pass
 
     @staticmethod
-    def get_list(category: str, page: int):
+    def get_list(category: str, page: int, proxy: bool):
         pass

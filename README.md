@@ -8,7 +8,7 @@ In order to run the server, it is essential to create a `.env` file that include
 
 `.env`
 
-```
+```python
 SECRET_KEY=<SECRET KEY>
 
 # optional
@@ -27,7 +27,7 @@ The following file is an example of what the files should resemble or look like.
 
 `docker-compose.yml`
 
-```
+```bash
 version: "3.7"
 
 services:
@@ -47,7 +47,7 @@ services:
 
 The following command will pull the docker image and start the server.
 
-```
+```bash
 sudo docker-compose up -d
 ```
 

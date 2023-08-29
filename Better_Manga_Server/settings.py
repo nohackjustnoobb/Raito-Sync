@@ -159,4 +159,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-VERSION = "Beta v0.2.14"
+PROXY_ADDRESS = os.getenv("PROXY_ADDRESS")
+
+VERSION = "Beta v0.3.14"

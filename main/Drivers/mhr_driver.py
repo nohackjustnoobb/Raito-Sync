@@ -8,6 +8,7 @@ import asyncio
 import aiohttp
 import chinese_converter
 
+from .util import use_proxy
 from .classes.driver import Chapters, BaseDriver, BaseDriverData
 from .classes.manga import Manga, SimpleManga
 
@@ -97,7 +98,24 @@ class MHR(BaseDriver):
     }
     supported_categories = list(categories.values())
     support_suggestion = True
-
+    proxy_settings = {
+        "genre": {
+            "thumbnail": [
+                "https://mhfm1us.cdnmanhua.net",
+                "https://mhfm2us.cdnmanhua.net",
+                "https://mhfm3us.cdnmanhua.net",
+                "https://mhfm4us.cdnmanhua.net",
+                "https://mhfm5us.cdnmanhua.net",
+                "https://mhfm6us.cdnmanhua.net",
+                "https://mhfm7us.cdnmanhua.net",
+                "https://mhfm8us.cdnmanhua.net",
+                "https://mhfm9us.cdnmanhua.net",
+                "https://mhfm10us.cdnmanhua.net",
+            ],
+            "manga": [],
+        },
+        "headers": {},
+    }
     headers = {
         "Authorization": "YINGQISTS2 eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc19mcm9tX3JndCI6ZmFsc2UsInVzZXJfbGVnYWN5X2lkIjo0NjIwOTk4NDEsImRldmljZV9pZCI6Ii0zNCw2OSw2MSw4MSw2LDExNCw2MSwtMzUsLTEsNDgsNiwzNSwtMTA3LC0xMjIsLTExLC04NywxMjcsNjQsLTM4LC03LDUwLDEzLC05NCwtMTcsLTI3LDkyLC0xNSwtMTIwLC0zNyw3NCwtNzksNzgiLCJ1dWlkIjoiOTlmYTYzYjQtNjFmNy00ODUyLThiNDMtMjJlNGY3YzY2MzhkIiwiY3JlYXRldGltZV91dGMiOiIyMDIzLTA3LTAzIDAyOjA1OjMwIiwibmJmIjoxNjg4MzkzMTMwLCJleHAiOjE2ODgzOTY3MzAsImlhdCI6MTY4ODM5MzEzMH0.IJAkDs7l3rEvURHiy06Y2STyuiIu-CYUk5E8en4LU0_mrJ83hKZR1nVqKiAY9ry_6ZmFzVfg-ap_TXTF6GTqihyM-nmEpD2NVWeWZ5VHWVgJif4ezB4YTs0YEpnVzYCk_x4p0wU2GYbqf1BFrNO7PQPMMPDGfaCTUqI_Pe2B0ikXMaN6CDkMho26KVT3DK-xytc6lO92RHvg65Hp3xC1qaonQXdws13wM6WckUmrswItroy9z38hK3w0rQgXOK2mu3o_4zOKLGfq5JpqOCNQCLJgQ0_jFXhMtaz6E_fMZx54fZHfF1YrA-tfs7KFgiYxMb8PnNILoniFrQhvET3y-Q",
         "X-Yq-Yqci": '{"av":"1.3.8","cy":"HK","lut":"1662458886867","nettype":1,"os":2,"di":"733A83F2FD3B554C3C4E4D46A307D560A52861C7","fcl":"appstore","fult":"1662458886867","cl":"appstore","pi":"","token":"","fut":"1662458886867","le":"en-HK","ps":"1","ov":"16.4","at":2,"rn":"1668x2388","ln":"","pt":"com.CaricatureManGroup.CaricatureManGroup","dm":"iPad8,6"}',
@@ -186,7 +204,7 @@ class MHR(BaseDriver):
         )
 
     @staticmethod
-    def get_list(category=None, page=None):
+    def get_list(category: str, page: int, proxy: bool):
         category = (
             0
             if category not in MHR.supported_categories
@@ -218,13 +236,18 @@ class MHR(BaseDriver):
             manga = response["response"]["mangas"]
             result = []
             for i in manga:
-                result.append(MHR.convert_to_simple(i))
+                simple = MHR.convert_to_simple(i)
+                if proxy:
+                    simple.thumbnail = use_proxy(
+                        MHR.identifier, simple.thumbnail, "thumbnail"
+                    )
+                result.append(simple)
             return result
         except:
             return []
 
     @staticmethod
-    def get_details(ids: list, show_all: bool):
+    def get_details(ids: list, show_all: bool, proxy: bool):
         if show_all:
 
             async def fetch_details():
@@ -274,6 +297,13 @@ class MHR(BaseDriver):
                         if categoriesText.find(i) != -1:
                             categories.append(MHR.categories[MHR.categoriesText[i]])
 
+                    thumbnail = MHR.change_to_faster_source(
+                        response["mangaPicimageUrl"]
+                    )
+
+                    if proxy:
+                        thumbnail = use_proxy(MHR.identifier, thumbnail, "thumbnail")
+
                     return Manga(
                         driver=MHR,
                         driver_data=MHRData(
@@ -284,9 +314,7 @@ class MHR(BaseDriver):
                         id=str(response["mangaId"]),
                         title=response["mangaName"],
                         chapters=Chapters(serial=serial, extra=extra),
-                        thumbnail=MHR.change_to_faster_source(
-                            response["mangaPicimageUrl"]
-                        ),
+                        thumbnail=thumbnail,
                         is_end=bool(response["mangaIsOver"]),
                         author=response["mangaAuthors"],
                         description=response["mangaIntro"],
@@ -328,12 +356,17 @@ class MHR(BaseDriver):
             manga = response["response"]["mangas"]
             result = []
             for i in manga:
-                result.append(MHR.convert_to_simple(i))
+                simple = MHR.convert_to_simple(i)
+                if proxy:
+                    simple.thumbnail = use_proxy(
+                        MHR.identifier, simple.thumbnail, "thumbnail"
+                    )
+                result.append(simple)
 
             return result
 
     @staticmethod
-    def get_chapter(chapter: int, is_extra: bool, data: str):
+    def get_chapter(chapter: int, is_extra: bool, data: str, proxy: bool):
         data_obj = MHRData.from_compressed(data)
         section_ids = data_obj.get_chapter_ids(chapter, is_extra)
 
@@ -361,7 +394,11 @@ class MHR(BaseDriver):
         results = []
 
         for i in response["mangaSectionImages"]:
-            results.append(base_url + i)
+            url = base_url + i
+            if proxy:
+                url = use_proxy(MHR.identifier, url, "manga")
+
+            results.append(url)
 
         return results
 
@@ -390,7 +427,7 @@ class MHR(BaseDriver):
 
         return result
 
-    def search(text, page=1):
+    def search(text, page=1, proxy=False):
         query = {
             "keywords": chinese_converter.to_simplified(text.replace("/", "")),
             "start": str((page - 1) * 50),
@@ -413,4 +450,4 @@ class MHR(BaseDriver):
         for i in response["result"]:
             ids.append(i["mangaId"])
 
-        return MHR.get_details(ids, False)
+        return MHR.get_details(ids, False, proxy)

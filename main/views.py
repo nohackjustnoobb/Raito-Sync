@@ -23,6 +23,7 @@ class List(APIView):
                 driver = parameters["driver"]
                 category = parameters.get("category")
                 page = parameters.get("page")
+                proxy = bool(int(parameters.get("proxy", "0")))
                 if page:
                     page = int(page)
             except:
@@ -31,7 +32,7 @@ class List(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            response = BetterMangaApp.get_list(driver, category, page)
+            response = BetterMangaApp.get_list(driver, category, page, proxy)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
@@ -100,13 +101,14 @@ class Details(APIView):
                 driver = parameters["driver"]
                 ids = parameters["ids"].split(",")
                 show_all = bool(int(parameters.get("show-all", "0")))
+                proxy = bool(int(parameters.get("proxy", "0")))
             except:
                 return Response(
                     {"error": '"driver" or "ids" are missing.'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            response = BetterMangaApp.get_details(driver, ids, show_all)
+            response = BetterMangaApp.get_details(driver, ids, show_all, proxy)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
@@ -126,13 +128,14 @@ class Search(APIView):
                 driver = parameters["driver"]
                 keyword = parameters["keyword"]
                 page = int(parameters.get("page", "1"))
+                proxy = bool(int(parameters.get("proxy", "0")))
             except:
                 return Response(
                     {"error": '"driver" or "keyword" are missing.'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            response = BetterMangaApp.search(driver, keyword, page)
+            response = BetterMangaApp.search(driver, keyword, page, proxy)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
@@ -151,6 +154,7 @@ class Chapter(APIView):
                 driver = parameters["driver"]
                 chapter = int(parameters["chapter"])
                 is_extra = bool(int(parameters.get("is-extra", "0")))
+                proxy = bool(int(parameters.get("proxy", "0")))
             except:
                 return Response(
                     {"error": '"driver" or "chapter" are missing.'},
@@ -158,7 +162,7 @@ class Chapter(APIView):
                 )
 
             response = BetterMangaApp.get_chapter(
-                driver, chapter, is_extra, request.data
+                driver, chapter, is_extra, request.data, proxy
             )
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
@@ -170,3 +174,8 @@ class Chapter(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class Proxy(APIView):
+    def get(self, request, format=None):
+        return Response(BetterMangaApp.get_proxy(), status=status.HTTP_200_OK)

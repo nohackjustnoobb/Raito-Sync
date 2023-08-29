@@ -7,7 +7,7 @@ import base64
 
 from .classes.driver import Chapters, BaseDriver, BaseDriverData
 from .classes.manga import Manga, SimpleManga
-from .util import get as cget
+from .util import get as cget, use_proxy
 
 
 @dataclass
@@ -64,9 +64,13 @@ class MHG(BaseDriver):
     supported_categories = list(categories.values())
     support_suggestion = False
     recommended_chunk_size = 5
+    proxy_settings = {
+        "genre": {"thumbnail": [], "manga": []},
+        "headers": {"referer": "https://tw.manhuagui.com"},
+    }
 
     @staticmethod
-    def get_details(ids: list, show_all: bool):
+    def get_details(ids: list, show_all: bool, proxy: bool):
         if len(ids) > 6:
             length = len(ids)
             return MHG.get_details(ids[: length // 2]) + MHG.get_details(
@@ -74,12 +78,14 @@ class MHG(BaseDriver):
             )
 
         async def extract_details(session, id):
-            text = cget(session, f"https://www.manhuagui.com/comic/{id}/")
+            text = cget(session, f"https://tw.manhuagui.com/comic/{id}/")
 
             soup = BeautifulSoup(text, "lxml")
             thumbnail = soup.find("p", class_="hcover")
             is_end = "finish" in thumbnail.find_all("span")[-1]["class"]
             thumbnail = "https:" + thumbnail.find("img")["src"]
+            if proxy:
+                thumbnail = use_proxy(MHG.identifier, thumbnail, "thumbnail")
             title = soup.find("div", class_="book-title").find("h1").text.strip()
             info = soup.find("ul", class_="detail-list cf").find_all("li")
             categories = [
@@ -142,10 +148,10 @@ class MHG(BaseDriver):
         return asyncio.run(fetch_details())
 
     @staticmethod
-    def get_chapter(chapter: int, is_extra: bool, data: str):
+    def get_chapter(chapter: int, is_extra: bool, data: str, proxy: bool):
         data = MHGData.from_compressed(data)
         id = data.chapters_ids[chapter + (data.serial_len if is_extra else 0)]
-        details = get(f"https://www.manhuagui.com/comic/{data.manga_id}/{id}.html")
+        details = get(f"https://tw.manhuagui.com/comic/{data.manga_id}/{id}.html")
         urls = list(
             map(
                 lambda x: f"https://i.hamreus.com{details['path']}{x}", details["files"]
@@ -162,7 +168,7 @@ class MHG(BaseDriver):
 
             async def fetch_imgs():
                 async with aiohttp.ClientSession(
-                    headers={"referer": "https://www.manhuagui.com"}
+                    headers={"referer": "https://tw.manhuagui.com"}
                 ) as session:
                     manga = []
                     for i in urls:
@@ -171,10 +177,14 @@ class MHG(BaseDriver):
 
             return asyncio.run(fetch_imgs())
 
-        return get_img(urls)
+        return (
+            map(lambda x: use_proxy(MHG.identifier, x, "manga"), urls)
+            if proxy
+            else get_img(urls)
+        )
 
     @staticmethod
-    def get_list(category=None, page=None):
+    def get_list(category: str, page: int, proxy: bool):
         category = (
             ""
             if category not in MHG.supported_categories
@@ -186,7 +196,7 @@ class MHG(BaseDriver):
         page = f"index_p{page if page else 1}.html"
 
         response = requests.get(
-            f"https://www.manhuagui.com/list/{category}{page}",
+            f"https://tw.manhuagui.com/list/{category}{page}",
         )
         soup = BeautifulSoup(response.text, "lxml")
 
@@ -199,6 +209,9 @@ class MHG(BaseDriver):
             except:
                 src = details.find("img")["data-src"]
             thumbnail = "https:" + src
+            if proxy:
+                thumbnail = use_proxy(MHG.identifier, thumbnail, "thumbnail")
+
             latest = (
                 details.find("span", class_="tt")
                 .text.replace("更新至", "")
@@ -223,9 +236,9 @@ class MHG(BaseDriver):
         return result
 
     @staticmethod
-    def search(text, page=1):
+    def search(text, page=1, proxy=False):
         response = requests.get(
-            f"https://www.manhuagui.com/s/{text}_p{page}.html",
+            f"https://tw.manhuagui.com/s/{text}_p{page}.html",
         )
         soup = BeautifulSoup(response.text, "lxml")
 
@@ -242,6 +255,8 @@ class MHG(BaseDriver):
             except:
                 src = details.find("img")["data-src"]
             thumbnail = "https:" + src
+            if proxy:
+                thumbnail = use_proxy(MHG.identifier, thumbnail, "thumbnail")
             title = i.find("dt").find("a").text.strip()
             is_end = i.find("dd").find("span")
             latest = is_end.find("a").text.strip()
