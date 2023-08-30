@@ -5,7 +5,6 @@ import re
 import urllib.parse
 import requests
 import json
-import asyncio
 import chinese_converter
 
 from .util import use_proxy

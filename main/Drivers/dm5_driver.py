@@ -3,7 +3,6 @@ from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
 import js2py
-import asyncio
 import chinese_converter
 
 from .classes.driver import Chapters, BaseDriver, BaseDriverData

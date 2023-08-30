@@ -4,6 +4,7 @@ db.sqlite3
 
 **/__init__.py
 **/migrations/
+**/__pycache__
 
 .DS_Store
 docker-compose.yml
