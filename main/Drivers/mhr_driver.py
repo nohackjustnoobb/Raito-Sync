@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 import hashlib
 import re
@@ -5,7 +6,6 @@ import urllib.parse
 import requests
 import json
 import asyncio
-import aiohttp
 import chinese_converter
 
 from .util import use_proxy
@@ -121,6 +121,12 @@ class MHR(BaseDriver):
         "X-Yq-Yqci": '{"av":"1.3.8","cy":"HK","lut":"1662458886867","nettype":1,"os":2,"di":"733A83F2FD3B554C3C4E4D46A307D560A52861C7","fcl":"appstore","fult":"1662458886867","cl":"appstore","pi":"","token":"","fut":"1662458886867","le":"en-HK","ps":"1","ov":"16.4","at":2,"rn":"1668x2388","ln":"","pt":"com.CaricatureManGroup.CaricatureManGroup","dm":"iPad8,6"}',
         "User-Agent": "Mozilla/5.0 (Linux; Android 12; sdk_gphone64_arm64 Build/SE1A.220630.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36",
     }
+    extra_query = {
+        "gak": "android_manhuaren2",
+        "gaui": "462099841",
+        "gft": "json",
+        "gui": "462099841",
+    }
 
     @staticmethod
     def hashGETQuery(map):
@@ -220,9 +226,7 @@ class MHR(BaseDriver):
             "limit": "50",
             "subCategoryId": str(category),
             "sort": "0",
-            "gak": "android_manhuaren2",
-            "gft": "json",
-            "gui": "462099841",
+            **MHR.extra_query,
         }
         query["gsn"] = MHR.hashGETQuery(query)
 
@@ -249,28 +253,23 @@ class MHR(BaseDriver):
     @staticmethod
     def get_details(ids: list, show_all: bool, proxy: bool):
         if show_all:
+            session = requests.Session()
+            session.headers = MHR.headers
 
-            async def fetch_details():
-                async def extract_details(session, id):
+            def fetch_details():
+                def extract_details(id):
                     query = {
                         "mangaId": str(id),
                         "mangaDetailVersion": "",
-                        "gak": "android_manhuaren2",
-                        "gaui": "462099841",
-                        "gft": "json",
-                        "gui": "462099841",
+                        **MHR.extra_query,
                     }
-
+                    print(query)
                     query["gsn"] = MHR.hashGETQuery(query)
 
-                    response = (
-                        await (
-                            await session.get(
-                                "https://hkmangaapi.manhuaren.com/v1/manga/getDetail?"
-                                + urllib.parse.urlencode(query)
-                            )
-                        ).json()
-                    )["response"]
+                    response = session.get(
+                        "https://hkmangaapi.manhuaren.com/v1/manga/getDetail?"
+                        + urllib.parse.urlencode(query)
+                    ).json()["response"]
 
                     def extract_chapter(raw):
                         chapters = []
@@ -322,20 +321,13 @@ class MHR(BaseDriver):
                         categories=categories,
                     )
 
-                async with aiohttp.ClientSession(headers=MHR.headers) as session:
-                    manga = []
-                    for i in ids:
-                        manga.append(asyncio.ensure_future(extract_details(session, i)))
-                    return await asyncio.gather(*manga)
+                with ThreadPoolExecutor(max_workers=10) as pool:
+                    manga = list(pool.map(extract_details, ids))
+                return manga
 
-            return asyncio.run(fetch_details())
+            return fetch_details()
         else:
-            query = {
-                "gak": "android_manhuaren2",
-                "gft": "json",
-                "gui": "462099841",
-                "gaui": "462099841",
-            }
+            query = MHR.extra_query.copy()
 
             body = {
                 "bookIds": [],
@@ -376,10 +368,7 @@ class MHR(BaseDriver):
             "netType": "1",
             "loadreal": "1",
             "imageQuality": "2",
-            "gak": "android_manhuaren2",
-            "gft": "json",
-            "gui": "462099841",
-            "gaui": "462099841",
+            **MHR.extra_query,
         }
 
         query["gsn"] = MHR.hashGETQuery(query)
@@ -406,11 +395,8 @@ class MHR(BaseDriver):
     def get_suggestion(text):
         query = {
             "keywords": chinese_converter.to_simplified(text.replace("/", "")),
-            "gak": "android_manhuaren2",
-            "gft": "json",
-            "gui": "462099841",
-            "gaui": "462099841",
             "mh_is_anonymous": "0",
+            **MHR.extra_query,
         }
 
         query["gsn"] = MHR.hashGETQuery(query)
@@ -432,10 +418,7 @@ class MHR(BaseDriver):
             "keywords": chinese_converter.to_simplified(text.replace("/", "")),
             "start": str((page - 1) * 50),
             "limit": "50",
-            "gak": "android_manhuaren2",
-            "gaui": "462099841",
-            "gft": "json",
-            "gui": "462099841",
+            **MHR.extra_query,
         }
 
         query["gsn"] = MHR.hashGETQuery(query)

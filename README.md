@@ -4,19 +4,6 @@ Better Manga App is an open-source project aimed at simplifying the process of r
 
 ## Quick Start
 
-In order to run the server, it is essential to create a `.env` file that includes the SECRET KEY of the server. An example of the `.env` file is shown below:
-
-`.env`
-
-```python
-SECRET_KEY=<SECRET KEY>
-
-# optional
-# key required to create new accounts
-# leave blank to allow everyone to create new accounts
-REGISTER_KEY=<REGISTER_KEY>
-```
-
 ### Running with Docker
 
 The easiest way to start with the server is by running it as a Docker container.
@@ -37,8 +24,15 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      - SECRET_KEY=<SECRET KEY>
+      # optional
+      # key required to create new accounts
+      # leave blank to allow everyone to create new accounts
+      - REGISTER_KEY=<REGISTER KEY>
+      # optional
+      # check https://github.com/nohackjustnoobb/Better-Manga-Proxy for more information
+      - PROXY_ADDRESS=<PROXY ADDRESS>
     volumes:
       - ./db.sqlite3:/app/db.sqlite3
 ```
@@ -52,6 +46,22 @@ sudo docker-compose up -d
 ```
 
 ### Manual Setup
+
+In order to run the server, it is essential to create a `.env` file. An example of the `.env` file is shown below:
+
+`.env`
+
+```python
+SECRET_KEY=<SECRET KEY>
+
+# optional
+# key required to create new accounts
+# leave blank to allow everyone to create new accounts
+REGISTER_KEY=<REGISTER KEY>
+
+#optional
+PROXY_ADDRESS=<PROXY ADDRESS>
+```
 
 Make sure that you have Python installed.
 

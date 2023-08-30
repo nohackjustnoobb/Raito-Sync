@@ -1,8 +1,8 @@
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
 import js2py
-import aiohttp
 import asyncio
 import chinese_converter
 
@@ -81,7 +81,11 @@ class DM5(BaseDriver):
 
     @staticmethod
     def get_details(ids: list, show_all: bool, proxy: bool):
-        async def extract_details(session, id):
+        session = requests.Session()
+        session.headers = {"Accept-Language": "en-US,en;q=0.5"}
+        session.cookies.set("isAdult", "1")
+
+        def extract_details(id):
             text = get(session, f"https://www.dm5.com/manhua-{id}/")
 
             soup = BeautifulSoup(text, "lxml")
@@ -154,16 +158,12 @@ class DM5(BaseDriver):
 
             return manga if show_all else manga.to_simple
 
-        async def fetch_details():
-            async with aiohttp.ClientSession(
-                headers={"Accept-Language": "en-US,en;q=0.5"}, cookies={"isAdult": 1}
-            ) as session:
-                manga = []
-                for i in ids:
-                    manga.append(asyncio.ensure_future(extract_details(session, i)))
-                return await asyncio.gather(*manga)
+        def fetch_details():
+            with ThreadPoolExecutor(max_workers=10) as pool:
+                manga = list(pool.map(extract_details, ids))
+            return manga
 
-        return asyncio.run(fetch_details())
+        return fetch_details()
 
     @staticmethod
     def __extract_small_preview(item):

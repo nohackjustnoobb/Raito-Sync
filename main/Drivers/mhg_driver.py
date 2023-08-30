@@ -1,7 +1,6 @@
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-import aiohttp
 import requests
-import asyncio
 from bs4 import BeautifulSoup
 import base64
 
@@ -77,7 +76,9 @@ class MHG(BaseDriver):
                 ids[length // 2 :]
             )
 
-        async def extract_details(session, id):
+        session = requests.Session()
+
+        def extract_details(id):
             text = cget(session, f"https://tw.manhuagui.com/comic/{id}/")
 
             soup = BeautifulSoup(text, "lxml")
@@ -138,14 +139,12 @@ class MHG(BaseDriver):
 
             return manga if show_all else manga.to_simple
 
-        async def fetch_details():
-            async with aiohttp.ClientSession() as session:
-                manga = []
-                for i in ids:
-                    manga.append(asyncio.ensure_future(extract_details(session, i)))
-                return await asyncio.gather(*manga)
+        def fetch_details():
+            with ThreadPoolExecutor(max_workers=10) as pool:
+                manga = list(pool.map(extract_details, ids))
+            return manga
 
-        return asyncio.run(fetch_details())
+        return fetch_details()
 
     @staticmethod
     def get_chapter(chapter: int, is_extra: bool, data: str, proxy: bool):
@@ -159,23 +158,22 @@ class MHG(BaseDriver):
         )
 
         def get_img(urls):
-            async def extract_img(session, url):
-                async with session.get(url) as resp:
+            session = requests.Session()
+            session.headers = {"referer": "https://tw.manhuagui.com"}
+
+            def extract_img(url):
+                with session.get(url) as resp:
                     return (
                         "data:image/webp;charset=utf-8;base64,"
-                        + base64.b64encode(await resp.read()).decode()
+                        + base64.b64encode(resp.content).decode()
                     )
 
-            async def fetch_imgs():
-                async with aiohttp.ClientSession(
-                    headers={"referer": "https://tw.manhuagui.com"}
-                ) as session:
-                    manga = []
-                    for i in urls:
-                        manga.append(asyncio.ensure_future(extract_img(session, i)))
-                    return await asyncio.gather(*manga)
+            def fetch_imgs():
+                with ThreadPoolExecutor(max_workers=10) as pool:
+                    manga = list(pool.map(extract_img, urls))
+                return manga
 
-            return asyncio.run(fetch_imgs())
+            return fetch_imgs()
 
         return (
             map(lambda x: use_proxy(MHG.identifier, x, "manga"), urls)
