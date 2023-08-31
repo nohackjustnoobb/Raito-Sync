@@ -24,16 +24,16 @@ class BaseDriverData:
         pass
 
     @staticmethod
-    def from_dict(dict):
+    def from_dict(dict: dict):
         pass
 
     @staticmethod
-    def from_compressed(compressed):
+    def from_compressed(compressed: str):
         pass
 
     @staticmethod
-    def _from_compresssed(driver, compressed):
-        return driver.from_dict(json.loads(BaseDriverData.decompress(compressed)))
+    def _from_compresssed(driverData, compressed):
+        return driverData.from_dict(json.loads(BaseDriverData.decompress(compressed)))
 
     @property
     def compressed(self):
@@ -42,7 +42,7 @@ class BaseDriverData:
         return compressed
 
     @staticmethod
-    def decompress(compressed):
+    def decompress(compressed: str):
         return lzma.decompress(base64.b64decode(compressed)).decode()
 
 
@@ -54,17 +54,23 @@ class BaseDriver:
     proxy_settings = {}
 
     @staticmethod
-    def get_details(ids: list, show_all: bool, proxy: bool):
+    def get_details(ids: list, show_all: bool, proxy: bool) -> list:
         pass
 
     @staticmethod
-    def search(text: str, page: int, proxy: bool):
+    def search(text: str, page: int, proxy: bool) -> list:
         pass
 
     @staticmethod
-    def get_chapter(chapter: int, is_extra: bool, data: BaseDriverData, proxy: bool):
+    def get_chapter(
+        chapter: int, is_extra: bool, data: BaseDriverData, proxy: bool
+    ) -> list:
         pass
 
     @staticmethod
-    def get_list(category: str, page: int, proxy: bool):
+    def get_list(category: str, page: int, proxy: bool) -> list:
+        pass
+
+    @staticmethod
+    def check_online() -> bool:
         pass

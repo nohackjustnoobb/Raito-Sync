@@ -262,7 +262,6 @@ class MHR(BaseDriver):
                         "mangaDetailVersion": "",
                         **MHR.extra_query,
                     }
-                    print(query)
                     query["gsn"] = MHR.hashGETQuery(query)
 
                     response = session.get(
@@ -412,6 +411,7 @@ class MHR(BaseDriver):
 
         return result
 
+    @staticmethod
     def search(text, page=1, proxy=False):
         query = {
             "keywords": chinese_converter.to_simplified(text.replace("/", "")),
@@ -433,3 +433,11 @@ class MHR(BaseDriver):
             ids.append(i["mangaId"])
 
         return MHR.get_details(ids, False, proxy)
+
+    @staticmethod
+    def check_online() -> bool:
+        try:
+            requests.get("https://hkmangaapi.manhuaren.com", timeout=5)
+            return True
+        except:
+            return False

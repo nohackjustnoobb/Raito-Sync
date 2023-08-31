@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 from .Drivers.dm5_driver import DM5
 from .Drivers.mhg_driver import MHG
 from .Drivers.mhr_driver import MHR
@@ -82,5 +84,24 @@ class BetterMangaApp:
         result = {}
         for i in BetterMangaApp.available_drivers:
             result[i.identifier] = i.proxy_settings
+
+        return result
+
+    @staticmethod
+    def check_online():
+        result = {}
+
+        def check_driver_online(driver):
+            start = datetime.now()
+            is_online = driver.check_online()
+            result[driver.identifier] = {
+                "online": is_online,
+                "latency": (datetime.now() - start).microseconds / 1000
+                if is_online
+                else 0,
+            }
+
+        with ThreadPoolExecutor(max_workers=10) as pool:
+            pool.map(check_driver_online, BetterMangaApp.available_drivers)
 
         return result

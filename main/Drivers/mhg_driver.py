@@ -280,6 +280,14 @@ class MHG(BaseDriver):
 
         return result
 
+    @staticmethod
+    def check_online() -> bool:
+        try:
+            requests.get("https://tw.manhuagui.com/", timeout=5)
+            return True
+        except:
+            return False
+
 
 # Development by HSSLCreative
 # link: https://github.com/HSSLC/manhuagui-dlr

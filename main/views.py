@@ -179,3 +179,8 @@ class Chapter(APIView):
 class Proxy(APIView):
     def get(self, request, format=None):
         return Response(BetterMangaApp.get_proxy(), status=status.HTTP_200_OK)
+
+
+class Online(APIView):
+    def get(self, request, format=None):
+        return Response(BetterMangaApp.check_online(), status=status.HTTP_200_OK)

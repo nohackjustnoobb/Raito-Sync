@@ -16,7 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken import views
-from main.views import List, Suggestion, Drivers, Details, Search, Chapter, Proxy
+from main.views import (
+    List,
+    Suggestion,
+    Drivers,
+    Details,
+    Search,
+    Chapter,
+    Proxy,
+    Online,
+)
 from user.views import MyInfo, Collections, Histories, Clear, Create
 
 urlpatterns = [
@@ -27,6 +36,7 @@ urlpatterns = [
     path("chapter", Chapter.as_view()),
     path("driver", Drivers.as_view()),
     path("driver/proxy", Proxy.as_view()),
+    path("driver/online", Online.as_view()),
     path("details", Details.as_view()),
     path("user/me", MyInfo.as_view()),
     path("user/clear", Clear.as_view()),

@@ -295,3 +295,11 @@ class DM5(BaseDriver):
             result.append(simple)
 
         return result
+
+    @staticmethod
+    def check_online() -> bool:
+        try:
+            requests.get("https://dm5.com", timeout=5)
+            return True
+        except:
+            return False
