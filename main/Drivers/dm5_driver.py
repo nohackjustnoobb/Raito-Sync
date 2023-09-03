@@ -299,7 +299,7 @@ class DM5(BaseDriver):
     @staticmethod
     def check_online() -> bool:
         try:
-            requests.get("https://dm5.com", timeout=5)
+            requests.get("https://www.dm5.com", timeout=5)
             return True
         except:
             return False
