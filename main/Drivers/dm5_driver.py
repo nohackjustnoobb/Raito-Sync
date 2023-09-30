@@ -173,7 +173,6 @@ class DM5(BaseDriver):
         latest = item.find("p", class_="chapter")
         is_end = latest.find("span").text.strip() == "完结"
         latest = latest.find("a").text.strip()
-        author = [j.text.strip() for j in item.find("p", class_="author").find_all("a")]
         return SimpleManga(
             driver=DM5,
             id=id,
@@ -181,7 +180,6 @@ class DM5(BaseDriver):
             thumbnail=thumbnail,
             is_end=is_end,
             latest=latest,
-            author=author,
         )
 
     @staticmethod
@@ -269,9 +267,7 @@ class DM5(BaseDriver):
                 .find("a", class_="btn-2")["title"]
                 .replace(title, "")[1:]
             )
-            author = [
-                i.text.strip() for i in huge.find("p", class_="subtitle").find_all("a")
-            ]
+
             result.append(
                 SimpleManga(
                     driver=DM5,
@@ -280,7 +276,6 @@ class DM5(BaseDriver):
                     thumbnail=thumbnail,
                     is_end=is_end,
                     latest=latest,
-                    author=author,
                 )
             )
 

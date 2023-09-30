@@ -8,7 +8,6 @@ class SimpleManga:
     id: str
     title: str
     thumbnail: str
-    author: list
     latest: str
     is_end: bool
 
@@ -25,7 +24,6 @@ class SimpleManga:
             "thumbnail": self.thumbnail,
             "latest": self.latest,
             "isEnd": self.is_end,
-            "author": self.author,
         }
 
 
@@ -56,14 +54,13 @@ class Manga:
         "Restricted",
         "CrossDressing",
     ]
-
-    driver: str
     id: str
     thumbnail: str
     title: str
     author: str
     description: str
     is_end: bool
+    author: list
     categories: tuple
     chapters: Chapters
     driver: BaseDriver
@@ -101,7 +98,6 @@ class Manga:
             else self.chapters.extra[0]
             if len(self.chapters.extra)
             else None,
-            author=self.author,
         )
 
     @property

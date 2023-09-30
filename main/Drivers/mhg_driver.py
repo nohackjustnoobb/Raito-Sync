@@ -227,7 +227,6 @@ class MHG(BaseDriver):
                     thumbnail=thumbnail,
                     is_end=is_end,
                     latest=latest,
-                    author=[],
                 )
             )
 
@@ -259,12 +258,6 @@ class MHG(BaseDriver):
             is_end = i.find("dd").find("span")
             latest = is_end.find("a").text.strip()
             is_end = is_end.find("span").text == "已完结"
-            author = list(
-                map(
-                    lambda x: x.text.strip(),
-                    i.find_all("dd", class_="tags")[-2].find("span").find_all("a"),
-                )
-            )
 
             result.append(
                 SimpleManga(
@@ -274,7 +267,6 @@ class MHG(BaseDriver):
                     thumbnail=thumbnail,
                     is_end=is_end,
                     latest=latest,
-                    author=author,
                 )
             )
 

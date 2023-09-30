@@ -193,9 +193,6 @@ class MHR(BaseDriver):
 
     @staticmethod
     def convert_to_simple(data):
-        author = re.split("，| |  ", data["mangaAuthor"])
-        author = [s for s in author if s]
-
         return SimpleManga(
             driver=MHR,
             id=str(data["mangaId"]),
@@ -205,7 +202,6 @@ class MHR(BaseDriver):
             latest=data["mangaNewestContent"]
             if data.get("mangaNewestContent")
             else data["mangaNewsectionName"],
-            author=author,
         )
 
     @staticmethod
