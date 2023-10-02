@@ -1,45 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 import hashlib
-import re
 import urllib.parse
 import requests
 import json
 import chinese_converter
 
-from .util import use_proxy
-from .classes.driver import Chapters, BaseDriver, BaseDriverData
-from .classes.manga import Manga, SimpleManga
-
-
-@dataclass
-class MHRData(BaseDriverData):
-    manga_id: str
-    chapters_ids: list
-    serial_len: int
-
-    def get_chapter_ids(self, chapter, is_extra):
-        return self.chapters_ids[chapter + self.serial_len if is_extra else chapter]
-
-    @property
-    def dict(self):
-        return {
-            "chapters_urls": self.chapters_ids,
-            "serial_len": self.serial_len,
-            "manga_id": self.manga_id,
-        }
-
-    @staticmethod
-    def from_dict(dict):
-        return MHRData(
-            chapters_ids=dict["chapters_urls"],
-            serial_len=dict["serial_len"],
-            manga_id=dict["manga_id"],
-        )
-
-    @staticmethod
-    def from_compressed(compressed):
-        return MHRData._from_compresssed(MHRData, compressed)
+from .models.driver import BaseDriver
+from .models.manga import Manga, SimpleManga, Chapters, Chapter
 
 
 class MHR(BaseDriver):
@@ -205,7 +172,7 @@ class MHR(BaseDriver):
         )
 
     @staticmethod
-    def get_list(category: str, page: int, proxy: bool):
+    def get_list(category: str, page: int):
         category = (
             0
             if category not in MHR.supported_categories
@@ -236,17 +203,14 @@ class MHR(BaseDriver):
             result = []
             for i in manga:
                 simple = MHR.convert_to_simple(i)
-                if proxy:
-                    simple.thumbnail = use_proxy(
-                        MHR.identifier, simple.thumbnail, "thumbnail"
-                    )
+
                 result.append(simple)
             return result
         except:
             return []
 
     @staticmethod
-    def get_details(ids: list, show_all: bool, proxy: bool):
+    def get_details(ids: list, show_all: bool):
         if show_all:
             session = requests.Session()
             session.headers = MHR.headers
@@ -267,21 +231,17 @@ class MHR(BaseDriver):
 
                     def extract_chapter(raw):
                         chapters = []
-                        chapters_ids = []
 
                         for i in raw:
-                            chapters.append(i["sectionName"])
-                            chapters_ids.append(i["sectionId"])
-                        return chapters, chapters_ids
+                            chapters.append(
+                                Chapter(title=i["sectionName"], id=str(i["sectionId"]))
+                            )
+                        return chapters
 
-                    serial, chapters_ids = extract_chapter(response["mangaWords"])
+                    serial = extract_chapter(response["mangaWords"])
 
-                    extra, temp = extract_chapter(response["mangaRolls"])
-                    chapters_ids.extend(temp)
-
-                    temp, temp2 = extract_chapter(response["mangaEpisode"])
-                    extra.extend(temp)
-                    chapters_ids.extend(temp2)
+                    extra = extract_chapter(response["mangaRolls"])
+                    extra.extend(extract_chapter(response["mangaEpisode"]))
 
                     categoriesText = response["mangaTheme"]
                     categories = []
@@ -294,19 +254,11 @@ class MHR(BaseDriver):
                         response["mangaPicimageUrl"]
                     )
 
-                    if proxy:
-                        thumbnail = use_proxy(MHR.identifier, thumbnail, "thumbnail")
-
                     return Manga(
                         driver=MHR,
-                        driver_data=MHRData(
-                            chapters_ids=chapters_ids,
-                            serial_len=len(serial),
-                            manga_id=str(response["mangaId"]),
-                        ),
                         id=str(response["mangaId"]),
                         title=response["mangaName"],
-                        chapters=Chapters(serial=serial, extra=extra),
+                        chapters=Chapters(serial=serial, extra=extra, extra_data=id),
                         thumbnail=thumbnail,
                         is_end=bool(response["mangaIsOver"]),
                         author=response["mangaAuthors"],
@@ -343,22 +295,16 @@ class MHR(BaseDriver):
             result = []
             for i in manga:
                 simple = MHR.convert_to_simple(i)
-                if proxy:
-                    simple.thumbnail = use_proxy(
-                        MHR.identifier, simple.thumbnail, "thumbnail"
-                    )
+
                 result.append(simple)
 
             return result
 
     @staticmethod
-    def get_chapter(chapter: int, is_extra: bool, data: str, proxy: bool):
-        data_obj = MHRData.from_compressed(data)
-        section_ids = data_obj.get_chapter_ids(chapter, is_extra)
-
+    def get_chapter(id: str, extra_data: str):
         query = {
-            "mangaSectionId": str(section_ids),
-            "mangaId": str(data_obj.manga_id),
+            "mangaSectionId": id,
+            "mangaId": extra_data,
             "netType": "1",
             "loadreal": "1",
             "imageQuality": "2",
@@ -378,8 +324,6 @@ class MHR(BaseDriver):
 
         for i in response["mangaSectionImages"]:
             url = base_url + i
-            if proxy:
-                url = use_proxy(MHR.identifier, url, "manga")
 
             results.append(url)
 
@@ -408,7 +352,7 @@ class MHR(BaseDriver):
         return result
 
     @staticmethod
-    def search(text, page=1, proxy=False):
+    def search(text, page=1):
         query = {
             "keywords": chinese_converter.to_simplified(text.replace("/", "")),
             "start": str((page - 1) * 50),
@@ -428,7 +372,7 @@ class MHR(BaseDriver):
         for i in response["result"]:
             ids.append(i["mangaId"])
 
-        return MHR.get_details(ids, False, proxy)
+        return MHR.get_details(ids, False)
 
     @staticmethod
     def check_online() -> bool:

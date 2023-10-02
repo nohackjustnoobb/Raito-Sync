@@ -147,31 +147,27 @@ class Search(APIView):
 
 
 class Chapter(APIView):
-    def post(self, request, format=None):
+    def get(self, request, format=None):
         try:
             try:
                 parameters = request.query_params
                 driver = parameters["driver"]
-                chapter = int(parameters["chapter"])
-                is_extra = bool(int(parameters.get("is-extra", "0")))
+                id = parameters["id"]
+                extra_data = parameters.get("extra-data", "")
                 proxy = bool(int(parameters.get("proxy", "0")))
             except:
                 return Response(
-                    {"error": '"driver" or "chapter" are missing.'},
+                    {"error": '"driver" or "id" are missing.'},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            response = BetterMangaApp.get_chapter(
-                driver, chapter, is_extra, request.data, proxy
-            )
+            response = BetterMangaApp.get_chapter(driver, id, extra_data, proxy)
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
         except:
             return Response(
-                {
-                    "error": "An error occurred when trying to get chapters. Check if you included the manga data in the body."
-                },
+                {"error": "An error occurred when trying to get chapters."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

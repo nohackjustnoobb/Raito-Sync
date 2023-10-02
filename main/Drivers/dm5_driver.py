@@ -1,33 +1,14 @@
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
 import js2py
 import chinese_converter
-
-from .classes.driver import Chapters, BaseDriver, BaseDriverData
-from .classes.manga import Manga, SimpleManga
-from .util import get, use_proxy
+from urllib.parse import urlparse, urlunparse
 
 
-@dataclass
-class DM5Data(BaseDriverData):
-    chapters_urls: list
-    serial_len: int
-
-    @property
-    def dict(self):
-        return {"chapters_urls": self.chapters_urls, "serial_len": self.serial_len}
-
-    @staticmethod
-    def from_dict(dict):
-        return DM5Data(
-            chapters_urls=dict["chapters_urls"], serial_len=dict["serial_len"]
-        )
-
-    @staticmethod
-    def from_compressed(compressed):
-        return DM5Data._from_compresssed(DM5Data, compressed)
+from .models.driver import BaseDriver
+from .models.manga import Manga, SimpleManga, Chapters, Chapter
+from .util import get
 
 
 class DM5(BaseDriver):
@@ -79,7 +60,7 @@ class DM5(BaseDriver):
     }
 
     @staticmethod
-    def get_details(ids: list, show_all: bool, proxy: bool):
+    def get_details(ids: list, show_all: bool):
         session = requests.Session()
         session.headers = {"Accept-Language": "en-US,en;q=0.5"}
         session.cookies.set("isAdult", "1")
@@ -103,8 +84,6 @@ class DM5(BaseDriver):
                 .strip()
             )
             thumbnail = soup.find("div", "cover").find("img")["src"]
-            if proxy:
-                thumbnail = use_proxy(DM5.identifier, thumbnail, "thumbnail")
 
             tip = info.find("p", class_="tip")
             is_end = tip.find("span", class_="").text != "连载中"
@@ -117,36 +96,26 @@ class DM5(BaseDriver):
             def extract_chapter(raw):
                 try:
                     chapters = []
-                    chapters_urls = []
                     for i in raw.findChildren("a"):
                         title = i.find(text=True, recursive=False).strip()
-                        chapters.append(title)
-                        chapters_urls.append(i["href"])
-                    return chapters, chapters_urls
+                        chapters.append(Chapter(title=title, id=i["href"][2:-1]))
+                    return chapters
                 except:
-                    return [], []
+                    return []
 
-            serial, chapters_urls = extract_chapter(
-                soup.find("ul", id="detail-list-select-1")
-            )
+            serial = extract_chapter(soup.find("ul", id="detail-list-select-1"))
 
             extra = []
             extra_id = ("detail-list-select-2", "detail-list-select-3")
             for i in extra_id:
                 raw = soup.find("ul", id=i)
                 if raw:
-                    result = extract_chapter(raw)
-                    extra.extend(result[0])
-                    chapters_urls.extend(result[1])
+                    extra.extend(extract_chapter(raw))
 
             manga = Manga(
                 driver=DM5,
-                driver_data=DM5Data(
-                    chapters_urls=chapters_urls,
-                    serial_len=len(serial),
-                ),
                 id=id,
-                chapters=Chapters(serial=serial, extra=extra),
+                chapters=Chapters(serial=serial, extra=extra, extra_data=""),
                 thumbnail=thumbnail,
                 title=title,
                 author=author,
@@ -183,11 +152,9 @@ class DM5(BaseDriver):
         )
 
     @staticmethod
-    def get_chapter(chapter: int, is_extra: bool, data: str, proxy: bool):
-        data = DM5Data.from_compressed(data)
-        url = data.chapters_urls[chapter + (data.serial_len if is_extra else 0)]
+    def get_chapter(id: str, extra_data: str):
         body = requests.get(
-            f"https://www.manhuaren.com/{url}/",
+            f"https://www.manhuaren.com/m{id}/",
             headers={"Accept-Language": "en-US,en;q=0.5"},
         ).text
 
@@ -196,15 +163,17 @@ class DM5(BaseDriver):
             return s[start_p : s.find(end, start_p) + 1]
 
         lst_str = js2py.eval_js(find_between(body, "eval(", ")\n</script>"))
-        result = find_between(lst_str, "['", "'];").replace("'", "").split(",")
+        result = []
 
-        if proxy:
-            result = map(lambda x: use_proxy(DM5.identifier, x, "manga"), result)
+        for i in find_between(lst_str, "['", "'];").replace("'", "").split(","):
+            parsed_url = urlparse(i)
+            parsed_url = parsed_url._replace(query=None)
+            result.append(urlunparse(parsed_url))
 
         return result
 
     @staticmethod
-    def get_list(category: str, page: int, proxy: bool):
+    def get_list(category: str, page: int):
         category = (
             "list"
             if category not in DM5.supported_categories
@@ -225,10 +194,6 @@ class DM5(BaseDriver):
             "div", class_="mh-item"
         ):
             simple = DM5.__extract_small_preview(i)
-            if proxy:
-                simple.thumbnail = use_proxy(
-                    DM5.identifier, simple.thumbnail, "thumbnail"
-                )
             result.append(simple)
 
         return result
@@ -244,7 +209,7 @@ class DM5(BaseDriver):
         return [i.text.strip() for i in soup.find_all("span", class_="left")]
 
     @staticmethod
-    def search(text, page=1, proxy=False):
+    def search(text, page=1):
         response = requests.get(
             f"https://www.dm5.com/search?title={chinese_converter.to_simplified(text)}&page={page}",
             headers={"Accept-Language": "en-US,en;q=0.5"},
@@ -255,8 +220,6 @@ class DM5(BaseDriver):
         huge = soup.find("div", class_="banner_detail_form")
         if huge:
             thumbnail = huge.find("img")["src"]
-            if proxy:
-                thumbnail = use_proxy(DM5.identifier, thumbnail, "thumbnail")
 
             title = huge.find("p", class_="title").find("a")
             id = title["href"][8:-1]
@@ -283,10 +246,6 @@ class DM5(BaseDriver):
             "div", class_="mh-item"
         ):
             simple = DM5.__extract_small_preview(i)
-            if proxy:
-                simple.thumbnail = use_proxy(
-                    DM5.identifier, simple.thumbnail, "thumbnail"
-                )
             result.append(simple)
 
         return result

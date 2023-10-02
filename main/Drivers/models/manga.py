@@ -1,5 +1,30 @@
 from dataclasses import dataclass
-from .driver import BaseDriverData, BaseDriver, Chapters
+from .driver import BaseDriver
+
+
+@dataclass
+class Chapter:
+    title: str
+    id: str
+
+    @property
+    def dict(self):
+        return {"title": self.title, "id": self.id}
+
+
+@dataclass
+class Chapters:
+    serial: list[Chapter]
+    extra: list[Chapter]
+    extra_data: str
+
+    @property
+    def dict(self):
+        return {
+            "serial": [i.dict for i in self.serial],
+            "extra": [i.dict for i in self.extra],
+            "extraData": self.extra_data,
+        }
 
 
 @dataclass
@@ -64,7 +89,6 @@ class Manga:
     categories: tuple
     chapters: Chapters
     driver: BaseDriver
-    driver_data: BaseDriverData
     latest: str = None
 
     @property
@@ -79,7 +103,6 @@ class Manga:
             "categories": self.categories,
             "chapters": self.chapters.dict,
             "description": self.description,
-            "driverData": self.driver_data.compressed,
             "latest": self.latest,
         }
 
@@ -93,9 +116,9 @@ class Manga:
             is_end=self.is_end,
             latest=self.latest
             if self.latest
-            else self.chapters.serial[0]
+            else self.chapters.serial[0].title
             if len(self.chapters.serial)
-            else self.chapters.extra[0]
+            else self.chapters.extra[0].title
             if len(self.chapters.extra)
             else None,
         )

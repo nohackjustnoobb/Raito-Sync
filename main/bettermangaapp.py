@@ -3,6 +3,7 @@ from datetime import datetime
 from .Drivers.dm5_driver import DM5
 from .Drivers.mhg_driver import MHG
 from .Drivers.mhr_driver import MHR
+from .Drivers.util import use_proxy
 
 
 class DriverNotFound(Exception):
@@ -25,41 +26,72 @@ class BetterMangaApp:
         driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
-        result = driver.search(text, page, proxy)
-        return list(map(lambda x: x.dict, result)) if driver else []
+        result = (
+            list(map(lambda x: x.dict, driver.search(text, page))) if driver else []
+        )
+        if proxy:
+            for i in result:
+                i["thumbnail"] = use_proxy(
+                    driver.identifier, i["thumbnail"], "thumbnail"
+                )
+
+        return result
 
     @staticmethod
     def get_list(driver_id: str, category: str, page: int, proxy: bool):
         driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
-        return (
-            list(map(lambda x: x.dict, driver.get_list(category, page, proxy)))
+
+        result = (
+            list(map(lambda x: x.dict, driver.get_list(category, page)))
             if driver
             else []
         )
+
+        if proxy:
+            for i in result:
+                i["thumbnail"] = use_proxy(
+                    driver.identifier, i["thumbnail"], "thumbnail"
+                )
+
+        return result
 
     @staticmethod
     def get_details(driver_id: str, ids: list, show_all: bool, proxy: bool):
         driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
-        return list(
+
+        result = list(
             map(
                 lambda x: x.dict,
-                driver.get_details(ids, show_all, proxy),
+                driver.get_details(ids, show_all),
             )
         )
 
+        if proxy:
+            for i in result:
+                i["thumbnail"] = use_proxy(
+                    driver.identifier, i["thumbnail"], "thumbnail"
+                )
+
+        return result
+
     @staticmethod
-    def get_chapter(
-        driver_id: str, chapter: int, is_extra: bool, data: str, proxy: bool
-    ):
+    def get_chapter(driver_id: str, id: str, extra_data: str, proxy: bool):
         driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
 
-        return driver.get_chapter(chapter, is_extra, data, proxy)
+        result = driver.get_chapter(id, extra_data)
+
+        if proxy:
+            result = list(
+                map(lambda x: use_proxy(driver.identifier, x, "manga"), result)
+            )
+
+        return result
 
     @staticmethod
     def get_suggestion(driver_id: str, text: str):

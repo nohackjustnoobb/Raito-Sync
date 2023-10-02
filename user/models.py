@@ -19,9 +19,9 @@ class History(models.Model):
     latest = models.TextField()
     datetime = models.IntegerField()
     new = models.BooleanField()
-    chapter = models.TextField(null=True)
+    chapterId = models.TextField(null=True)
+    chapterTitle = models.TextField(null=True)
     page = models.IntegerField(null=True)
-    isExtra = models.BooleanField(null=True)
 
 
 class User(AbstractBaseUser):

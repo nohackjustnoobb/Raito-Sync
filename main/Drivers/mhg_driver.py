@@ -1,39 +1,10 @@
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 import requests
 from bs4 import BeautifulSoup
-import base64
 
-from .classes.driver import Chapters, BaseDriver, BaseDriverData
-from .classes.manga import Manga, SimpleManga
-from .util import get as cget, use_proxy
-
-
-@dataclass
-class MHGData(BaseDriverData):
-    chapters_ids: list
-    serial_len: int
-    manga_id: str
-
-    @property
-    def dict(self):
-        return {
-            "chapters_ids": self.chapters_ids,
-            "serial_len": self.serial_len,
-            "manga_id": self.manga_id,
-        }
-
-    @staticmethod
-    def from_dict(dict):
-        return MHGData(
-            chapters_ids=dict["chapters_ids"],
-            serial_len=dict["serial_len"],
-            manga_id=dict["manga_id"],
-        )
-
-    @staticmethod
-    def from_compressed(compressed):
-        return MHGData._from_compresssed(MHGData, compressed)
+from .models.driver import BaseDriver
+from .models.manga import Manga, SimpleManga, Chapters, Chapter
+from .util import get as cget
 
 
 class MHG(BaseDriver):
@@ -69,7 +40,7 @@ class MHG(BaseDriver):
     }
 
     @staticmethod
-    def get_details(ids: list, show_all: bool, proxy: bool):
+    def get_details(ids: list, show_all: bool):
         if len(ids) > 6:
             length = len(ids)
             return MHG.get_details(ids[: length // 2]) + MHG.get_details(
@@ -85,8 +56,7 @@ class MHG(BaseDriver):
             thumbnail = soup.find("p", class_="hcover")
             is_end = "finish" in thumbnail.find_all("span")[-1]["class"]
             thumbnail = "https:" + thumbnail.find("img")["src"]
-            if proxy:
-                thumbnail = use_proxy(MHG.identifier, thumbnail, "thumbnail")
+
             title = soup.find("div", class_="book-title").find("h1").text.strip()
             info = soup.find("ul", class_="detail-list cf").find_all("li")
             categories = [
@@ -101,34 +71,28 @@ class MHG(BaseDriver):
 
             def extract_chapter(raw):
                 try:
-                    chapters = {}
-                    for i in raw.find_all("ul"):
-                        temp_dict = {}
+                    chapters = []
+                    for i in reversed(raw.find_all("ul")):
                         for j in i.find_all("a"):
-                            temp_dict[j["title"].strip()] = j["href"].replace(id, "")[
-                                8:-5
-                            ]
-                        chapters = {**temp_dict, **chapters}
-                    return list(chapters.keys()), list(chapters.values())
+                            chapters.append(
+                                Chapter(
+                                    title=j["title"].strip(),
+                                    id=j["href"].replace(id, "")[8:-5],
+                                )
+                            )
+                    return chapters
                 except:
-                    return [], []
+                    return []
 
-            serial, chapters_ids = extract_chapter(chapter_list[0])
+            serial = extract_chapter(chapter_list[0])
             extra = []
             for i in chapter_list[1:]:
-                result = extract_chapter(i)
-                extra.extend(result[0])
-                chapters_ids.extend(result[1])
+                extra.extend(extract_chapter(i))
 
             manga = Manga(
                 driver=MHG,
-                driver_data=MHGData(
-                    manga_id=id,
-                    chapters_ids=chapters_ids,
-                    serial_len=len(serial),
-                ),
                 id=id,
-                chapters=Chapters(serial=serial, extra=extra),
+                chapters=Chapters(serial=serial, extra=extra, extra_data=id),
                 thumbnail=thumbnail,
                 title=title,
                 author=author,
@@ -147,42 +111,18 @@ class MHG(BaseDriver):
         return fetch_details()
 
     @staticmethod
-    def get_chapter(chapter: int, is_extra: bool, data: str, proxy: bool):
-        data = MHGData.from_compressed(data)
-        id = data.chapters_ids[chapter + (data.serial_len if is_extra else 0)]
-        details = get(f"https://tw.manhuagui.com/comic/{data.manga_id}/{id}.html")
+    def get_chapter(id: str, extra_data: str):
+        details = get(f"https://tw.manhuagui.com/comic/{extra_data}/{id}.html")
         urls = list(
             map(
                 lambda x: f"https://i.hamreus.com{details['path']}{x}", details["files"]
             )
         )
 
-        def get_img(urls):
-            session = requests.Session()
-            session.headers = {"referer": "https://tw.manhuagui.com"}
-
-            def extract_img(url):
-                with session.get(url) as resp:
-                    return (
-                        "data:image/webp;charset=utf-8;base64,"
-                        + base64.b64encode(resp.content).decode()
-                    )
-
-            def fetch_imgs():
-                with ThreadPoolExecutor(max_workers=10) as pool:
-                    manga = list(pool.map(extract_img, urls))
-                return manga
-
-            return fetch_imgs()
-
-        return (
-            map(lambda x: use_proxy(MHG.identifier, x, "manga"), urls)
-            if proxy
-            else get_img(urls)
-        )
+        return urls
 
     @staticmethod
-    def get_list(category: str, page: int, proxy: bool):
+    def get_list(category: str, page: int):
         category = (
             ""
             if category not in MHG.supported_categories
@@ -207,8 +147,6 @@ class MHG(BaseDriver):
             except:
                 src = details.find("img")["data-src"]
             thumbnail = "https:" + src
-            if proxy:
-                thumbnail = use_proxy(MHG.identifier, thumbnail, "thumbnail")
 
             latest = (
                 details.find("span", class_="tt")
@@ -233,7 +171,7 @@ class MHG(BaseDriver):
         return result
 
     @staticmethod
-    def search(text, page=1, proxy=False):
+    def search(text, page=1):
         response = requests.get(
             f"https://tw.manhuagui.com/s/{text}_p{page}.html",
         )
@@ -252,8 +190,7 @@ class MHG(BaseDriver):
             except:
                 src = details.find("img")["data-src"]
             thumbnail = "https:" + src
-            if proxy:
-                thumbnail = use_proxy(MHG.identifier, thumbnail, "thumbnail")
+
             title = i.find("dt").find("a").text.strip()
             is_end = i.find("dd").find("span")
             latest = is_end.find("a").text.strip()
