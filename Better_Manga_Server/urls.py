@@ -29,15 +29,14 @@ from main.views import (
 from user.views import MyInfo, Collections, Histories, Clear, Create
 
 urlpatterns = [
-    path("admin", admin.site.urls),
     path("list", List.as_view()),
     path("suggestion", Suggestion.as_view()),
     path("search", Search.as_view()),
     path("chapter", Chapter.as_view()),
+    path("details", Details.as_view()),
     path("driver", Drivers.as_view()),
     path("driver/proxy", Proxy.as_view()),
     path("driver/online", Online.as_view()),
-    path("details", Details.as_view()),
     path("user/me", MyInfo.as_view()),
     path("user/clear", Clear.as_view()),
     path("user/create", Create.as_view()),

@@ -38,7 +38,6 @@ class DM5(BaseDriver):
         "list-tag61": Manga.categories_list[21],
     }
     supported_categories = list(categories.values())
-    support_suggestion = True
     recommended_chunk_size = 10
     proxy_settings = {
         "genre": {

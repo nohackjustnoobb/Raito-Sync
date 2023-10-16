@@ -32,7 +32,6 @@ class MHG(BaseDriver):
         "weiniang": Manga.categories_list[22],
     }
     supported_categories = list(categories.values())
-    support_suggestion = False
     recommended_chunk_size = 5
     proxy_settings = {
         "genre": {"thumbnail": [], "manga": []},

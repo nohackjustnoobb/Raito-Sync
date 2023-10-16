@@ -161,4 +161,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 PROXY_ADDRESS = os.getenv("PROXY_ADDRESS")
 
-VERSION = "0.1.0-beta.19"
+VERSION = "0.1.0-beta.20"
