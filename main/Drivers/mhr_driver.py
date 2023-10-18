@@ -210,7 +210,7 @@ class MHR(BaseDriver):
             return []
 
     @staticmethod
-    def get_details(ids: list, show_all: bool):
+    def get_manga(ids: list, show_all: bool):
         if show_all:
             session = requests.Session()
             session.headers = MHR.headers
@@ -372,7 +372,7 @@ class MHR(BaseDriver):
         for i in response["result"]:
             ids.append(i["mangaId"])
 
-        return MHR.get_details(ids, False)
+        return MHR.get_manga(ids, False)
 
     @staticmethod
     def check_online() -> bool:

@@ -6,7 +6,7 @@ class BaseDriver:
     proxy_settings = {}
 
     @staticmethod
-    def get_details(ids: list, show_all: bool) -> list:
+    def get_manga(ids: list, show_all: bool) -> list:
         pass
 
     @staticmethod

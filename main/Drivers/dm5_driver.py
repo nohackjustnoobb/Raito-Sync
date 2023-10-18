@@ -60,7 +60,7 @@ class DM5(BaseDriver):
     }
 
     @staticmethod
-    def get_details(ids: list, show_all: bool):
+    def get_manga(ids: list, show_all: bool):
         session = requests.Session()
         session.headers = {"Accept-Language": "en-US,en;q=0.5"}
         session.cookies.set("isAdult", "1")

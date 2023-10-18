@@ -40,12 +40,10 @@ class MHG(BaseDriver):
     }
 
     @staticmethod
-    def get_details(ids: list, show_all: bool):
+    def get_manga(ids: list, show_all: bool):
         if len(ids) > 6:
             length = len(ids)
-            return MHG.get_details(ids[: length // 2]) + MHG.get_details(
-                ids[length // 2 :]
-            )
+            return MHG.get_manga(ids[: length // 2]) + MHG.get_manga(ids[length // 2 :])
 
         session = requests.Session()
 

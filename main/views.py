@@ -2,6 +2,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -16,7 +17,7 @@ cache_time = 5 * 60
 
 class List(APIView):
     @method_decorator(cache_page(cache_time))
-    def get(self, request, format=None):
+    def get(self, request):
         try:
             try:
                 parameters = request.query_params
@@ -45,7 +46,7 @@ class List(APIView):
 
 class Suggestion(APIView):
     @method_decorator(cache_page(cache_time))
-    def get(self, request, format=None):
+    def get(self, request):
         try:
             try:
                 parameters = request.query_params
@@ -72,7 +73,7 @@ class Suggestion(APIView):
 
 
 class Drivers(APIView):
-    def get(self, request, format=None):
+    def get(self, request):
         try:
             try:
                 driver = request.query_params["driver"]
@@ -93,35 +94,39 @@ class Drivers(APIView):
             )
 
 
-class Details(APIView):
-    def get(self, request, format=None):
+@api_view(["GET", "POST"])
+def getManga(request):
+    try:
         try:
-            try:
-                parameters = request.query_params
-                driver = parameters["driver"]
-                ids = parameters["ids"].split(",")
-                show_all = bool(int(parameters.get("show-all", "0")))
-                proxy = bool(int(parameters.get("proxy", "0")))
-            except:
-                return Response(
-                    {"error": '"driver" or "ids" are missing.'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            response = BetterMangaApp.get_details(driver, ids, show_all, proxy)
-            return Response(response, status=status.HTTP_200_OK)
-        except DriverNotFound:
-            return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
+            parameters = request.query_params
+            driver = parameters["driver"]
+            ids = (
+                request.data["ids"]
+                if request.method == "POST"
+                else parameters["ids"].split(",")
+            )
+            show_all = bool(int(parameters.get("show-all", "0")))
+            proxy = bool(int(parameters.get("proxy", "0")))
         except:
             return Response(
-                {"error": "An unexpected error occurred when trying to get details."},
+                {"error": '"driver" or "ids" are missing.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        response = BetterMangaApp.get_manga(driver, ids, show_all, proxy)
+        return Response(response, status=status.HTTP_200_OK)
+    except DriverNotFound:
+        return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
+    except:
+        return Response(
+            {"error": "An unexpected error occurred when trying to get details."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class Search(APIView):
     @method_decorator(cache_page(cache_time))
-    def get(self, request, format=None):
+    def get(self, request):
         try:
             try:
                 parameters = request.query_params
@@ -147,7 +152,7 @@ class Search(APIView):
 
 
 class Chapter(APIView):
-    def get(self, request, format=None):
+    def get(self, request):
         try:
             try:
                 parameters = request.query_params
@@ -173,7 +178,7 @@ class Chapter(APIView):
 
 
 class Proxy(APIView):
-    def get(self, request, format=None):
+    def get(self, request):
         drivers = request.query_params.get("drivers", [])
         if drivers != []:
             drivers = drivers.split(",")
@@ -182,7 +187,7 @@ class Proxy(APIView):
 
 
 class Online(APIView):
-    def get(self, request, format=None):
+    def get(self, request):
         drivers = request.query_params.get("drivers", [])
         if drivers != []:
             drivers = drivers.split(",")

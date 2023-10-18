@@ -38,7 +38,7 @@ class SimpleManga:
 
     @property
     def details(self):
-        return self.driver.get_details(self.id)
+        return self.driver.get_manga(self.id)
 
     @property
     def dict(self):

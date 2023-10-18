@@ -58,7 +58,7 @@ class BetterMangaApp:
         return result
 
     @staticmethod
-    def get_details(driver_id: str, ids: list, show_all: bool, proxy: bool):
+    def get_manga(driver_id: str, ids: list, show_all: bool, proxy: bool):
         driver = BetterMangaApp.get_driver(id=driver_id)
         if not driver:
             raise DriverNotFound
@@ -66,7 +66,7 @@ class BetterMangaApp:
         result = list(
             map(
                 lambda x: x.dict,
-                driver.get_details(ids, show_all),
+                driver.get_manga(ids, show_all),
             )
         )
 
