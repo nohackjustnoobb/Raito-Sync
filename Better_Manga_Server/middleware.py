@@ -13,7 +13,7 @@ class serverInfoMiddleware:
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Expose-Headers": "Version, Available-Drivers",
             "Version": settings.VERSION,
-            "Available-Drivers": ", ".join(
+            "Available-Drivers": ",".join(
                 map(lambda x: x.identifier, BetterMangaApp.available_drivers),
             ),
         }

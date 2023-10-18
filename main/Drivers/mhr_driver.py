@@ -261,7 +261,7 @@ class MHR(BaseDriver):
                         chapters=Chapters(serial=serial, extra=extra, extra_data=id),
                         thumbnail=thumbnail,
                         is_end=bool(response["mangaIsOver"]),
-                        author=response["mangaAuthors"],
+                        authors=response["mangaAuthors"],
                         description=response["mangaIntro"],
                         latest=response["mangaNewsectionName"],
                         categories=categories,

@@ -82,10 +82,9 @@ class Manga:
     id: str
     thumbnail: str
     title: str
-    author: str
     description: str
     is_end: bool
-    author: list
+    authors: list
     categories: tuple
     chapters: Chapters
     driver: BaseDriver
@@ -99,7 +98,7 @@ class Manga:
             "title": self.title,
             "thumbnail": self.thumbnail,
             "isEnd": self.is_end,
-            "author": self.author,
+            "authors": self.authors,
             "categories": self.categories,
             "chapters": self.chapters.dict,
             "description": self.description,

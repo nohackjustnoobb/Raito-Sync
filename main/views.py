@@ -1,5 +1,6 @@
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django.conf import settings
 
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
@@ -13,6 +14,19 @@ from .bettermangaapp import (
 
 
 cache_time = 5 * 60
+
+
+class Info(APIView):
+    def get(self, request):
+        return Response(
+            {
+                "version": settings.VERSION,
+                "availableDrivers": map(
+                    lambda x: x.identifier, BetterMangaApp.available_drivers
+                ),
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class List(APIView):
@@ -119,7 +133,7 @@ def getManga(request):
         return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
     except:
         return Response(
-            {"error": "An unexpected error occurred when trying to get details."},
+            {"error": "An unexpected error occurred when trying to get manga."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 

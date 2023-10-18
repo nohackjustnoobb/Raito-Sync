@@ -74,7 +74,7 @@ class DM5(BaseDriver):
             title = (
                 info.find("p", class_="title").find(text=True, recursive=False).strip()
             )
-            author = [
+            authors = [
                 i.text.strip() for i in info.find("p", class_="subtitle").find_all("a")
             ]
             description = (
@@ -118,7 +118,7 @@ class DM5(BaseDriver):
                 chapters=Chapters(serial=serial, extra=extra, extra_data=""),
                 thumbnail=thumbnail,
                 title=title,
-                author=author,
+                authors=authors,
                 description=description,
                 is_end=is_end,
                 categories=categories,

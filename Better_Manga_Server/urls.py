@@ -18,6 +18,7 @@ from rest_framework.authtoken import views
 from main.views import (
     List,
     Suggestion,
+    Info,
     Drivers,
     getManga,
     Search,
@@ -28,6 +29,7 @@ from main.views import (
 from user.views import MyInfo, Collections, Histories, Clear, Create
 
 urlpatterns = [
+    path("", Info.as_view()),
     path("list", List.as_view()),
     path("suggestion", Suggestion.as_view()),
     path("search", Search.as_view()),

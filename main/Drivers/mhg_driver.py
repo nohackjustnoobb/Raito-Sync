@@ -62,7 +62,9 @@ class MHG(BaseDriver):
                 for i in info[1].find("span").find_all("a")
                 if i["href"][6:-1] in MHG.categories.keys()
             ]
-            author = [i.text.strip() for i in info[1].find_all("span")[1].find_all("a")]
+            authors = [
+                i.text.strip() for i in info[1].find_all("span")[1].find_all("a")
+            ]
             description = soup.find("div", id="intro-cut").text.strip()
 
             chapter_list = soup.find_all("div", class_="chapter-list")
@@ -93,7 +95,7 @@ class MHG(BaseDriver):
                 chapters=Chapters(serial=serial, extra=extra, extra_data=id),
                 thumbnail=thumbnail,
                 title=title,
-                author=author,
+                authors=authors,
                 description=description,
                 is_end=is_end,
                 categories=categories,
