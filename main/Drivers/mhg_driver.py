@@ -33,6 +33,7 @@ class MHG(BaseDriver):
     }
     supported_categories = list(categories.values())
     recommended_chunk_size = 5
+    support_suggestion = False
     proxy_settings = {
         "genre": {"thumbnail": [], "manga": []},
         "headers": {"referer": "https://tw.manhuagui.com"},

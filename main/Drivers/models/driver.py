@@ -2,6 +2,7 @@ class BaseDriver:
     identifier = ""
     supported_categories = []
     recommended_chunk_size = 0
+    support_suggestion = False
     proxy_settings = {}
 
     @staticmethod

@@ -63,6 +63,7 @@ class MHR(BaseDriver):
         "伪娘": 5,
     }
     supported_categories = list(categories.values())
+    support_suggestion = True
     proxy_settings = {
         "genre": {
             "thumbnail": [

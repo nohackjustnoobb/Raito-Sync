@@ -39,6 +39,7 @@ class DM5(BaseDriver):
     }
     supported_categories = list(categories.values())
     recommended_chunk_size = 10
+    support_suggestion = True
     proxy_settings = {
         "genre": {
             "thumbnail": [
