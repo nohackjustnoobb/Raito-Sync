@@ -174,9 +174,20 @@ class Chapter(APIView):
 
 class Proxy(APIView):
     def get(self, request, format=None):
-        return Response(BetterMangaApp.get_proxy(), status=status.HTTP_200_OK)
+        drivers = request.query_params.get("drivers", [])
+        if drivers != []:
+            drivers = drivers.split(",")
+
+        return Response(BetterMangaApp.get_proxy(drivers), status=status.HTTP_200_OK)
 
 
 class Online(APIView):
     def get(self, request, format=None):
-        return Response(BetterMangaApp.check_online(), status=status.HTTP_200_OK)
+        drivers = request.query_params.get("drivers", [])
+        if drivers != []:
+            drivers = drivers.split(",")
+
+        return Response(
+            BetterMangaApp.check_online(drivers),
+            status=status.HTTP_200_OK,
+        )

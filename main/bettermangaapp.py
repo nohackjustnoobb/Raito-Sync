@@ -111,28 +111,43 @@ class BetterMangaApp:
         }
 
     @staticmethod
-    def get_proxy():
+    def get_proxy(ids: list = []):
         result = {}
-        for i in BetterMangaApp.available_drivers:
-            result[i.identifier] = i.proxy_settings
+
+        for i in (
+            ids
+            if len(ids) != 0
+            else map(lambda x: x.identifier, BetterMangaApp.available_drivers)
+        ):
+            driver = BetterMangaApp.get_driver(id=i)
+            if driver:
+                result[driver.identifier] = driver.proxy_settings
 
         return result
 
     @staticmethod
-    def check_online():
+    def check_online(ids: list = []):
         result = {}
 
-        def check_driver_online(driver):
-            start = datetime.now()
-            is_online = driver.check_online()
-            result[driver.identifier] = {
-                "online": is_online,
-                "latency": (datetime.now() - start).microseconds / 1000
-                if is_online
-                else 0,
-            }
+        def check_driver_online(id):
+            driver = BetterMangaApp.get_driver(id=id)
+
+            if driver:
+                start = datetime.now()
+                is_online = driver.check_online()
+                result[driver.identifier] = {
+                    "online": is_online,
+                    "latency": (datetime.now() - start).microseconds / 1000
+                    if is_online
+                    else 0,
+                }
 
         with ThreadPoolExecutor(max_workers=10) as pool:
-            pool.map(check_driver_online, BetterMangaApp.available_drivers)
+            pool.map(
+                check_driver_online,
+                ids
+                if len(ids) != 0
+                else map(lambda x: x.identifier, BetterMangaApp.available_drivers),
+            )
 
         return result
