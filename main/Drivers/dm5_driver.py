@@ -56,7 +56,7 @@ class DM5(BaseDriver):
             ],
             "manga": [],
         },
-        "headers": {},
+        "headers": {"referer": "https://www.dm5.com"},
     }
 
     @staticmethod

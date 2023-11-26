@@ -26,7 +26,7 @@ from main.views import (
     Proxy,
     Online,
 )
-from user.views import MyInfo, Collections, Histories, Clear, Create
+from user.views import MyInfo, Collections, Histories, Clear, Create, ObtainToken
 
 urlpatterns = [
     path("", Info.as_view()),
@@ -43,5 +43,5 @@ urlpatterns = [
     path("user/create", Create.as_view()),
     path("user/collections", Collections.as_view()),
     path("user/histories", Histories.as_view()),
-    path("user/token", views.obtain_auth_token),
+    path("user/token", ObtainToken.as_view()),
 ]

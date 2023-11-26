@@ -1,6 +1,7 @@
 import os
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from rest_framework import status
 from rest_framework.views import APIView
 from datetime import datetime
@@ -65,38 +66,63 @@ class Clear(APIView):
 
 
 class Create(APIView):
-    permission_classes = [IsAuthenticated]
-
     def post(self, request, format=None):
         try:
             pw = request.data["password"]
-            un = request.data["username"]
+            em = request.data["email"]
             key = request.data["key"]
         except:
             return Response(
-                {"error": '"username", "password", or "key" are missing.'},
+                {"error": '"email", "password", or "key" are missing.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         REGISTER_KEY = os.getenv("REGISTER_KEY")
         if REGISTER_KEY and REGISTER_KEY != key:
             return Response(
-                {"error", "Register Key is not matching."},
+                {"error": "Register Key is not matching."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            user = User.objects.create_user(email=un, password=pw)
+            user = User.objects.create_user(email=em, password=pw)
         except:
             return Response(
                 {
-                    "error": "An error occurred when creating a user. Check if the username is unique."
+                    "error": "An error occurred when creating a user. Check if the email is registered."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer = UserSerializers(user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ObtainToken(APIView):
+    def post(self, request):
+        try:
+            pw = request.data["password"]
+            em = request.data["email"]
+        except:
+            return Response(
+                {"error": '"email" or "password" are missing.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user = User.objects.get(email=em)
+            if user.check_password(pw):
+                return Response(
+                    {"token": Token.objects.get_or_create(user=user)[0].key},
+                    status=status.HTTP_200_OK,
+                )
+
+            raise
+        except:
+            return Response(
+                {"error": '"email" or "password" are incorrect.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class Collections(APIView):
