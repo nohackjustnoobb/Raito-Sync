@@ -167,7 +167,9 @@ class DM5(BaseDriver):
 
         for i in find_between(lst_str, "['", "'];").replace("'", "").split(","):
             parsed_url = urlparse(i)
-            parsed_url = parsed_url._replace(query=None)
+            parsed_url = parsed_url._replace(
+                query="key=a89b0c650c44a049836ca1b8159901bf&uk=707970C804232C2908923C36C437DBA3876794ACC882C08B91FCF0617F57F006"
+            )
             result.append(urlunparse(parsed_url))
 
         return result

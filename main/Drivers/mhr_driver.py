@@ -4,6 +4,7 @@ import urllib.parse
 import requests
 import json
 import chinese_converter
+from urllib.parse import urlparse, urlunparse
 
 from .models.driver import BaseDriver
 from .models.manga import Manga, SimpleManga, Chapters, Chapter
@@ -323,9 +324,12 @@ class MHR(BaseDriver):
         results = []
 
         for i in response["mangaSectionImages"]:
-            url = base_url + i
+            url = urlparse(base_url + i)
+            url = url._replace(
+                query="key=a89b0c650c44a049836ca1b8159901bf&uk=707970C804232C2908923C36C437DBA3876794ACC882C08B91FCF0617F57F006"
+            )
 
-            results.append(url)
+            results.append(urlunparse(url))
 
         return results
 
