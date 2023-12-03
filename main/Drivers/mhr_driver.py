@@ -81,7 +81,7 @@ class MHR(BaseDriver):
             ],
             "manga": [],
         },
-        "headers": {"referer": "https://www.dm5.com"},
+        "headers": {"referer": "http://www.dm5.com/dm5api/"},
     }
     headers = {
         "Authorization": "YINGQISTS2 eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc19mcm9tX3JndCI6ZmFsc2UsInVzZXJfbGVnYWN5X2lkIjo0NjIwOTk4NDEsImRldmljZV9pZCI6Ii0zNCw2OSw2MSw4MSw2LDExNCw2MSwtMzUsLTEsNDgsNiwzNSwtMTA3LC0xMjIsLTExLC04NywxMjcsNjQsLTM4LC03LDUwLDEzLC05NCwtMTcsLTI3LDkyLC0xNSwtMTIwLC0zNyw3NCwtNzksNzgiLCJ1dWlkIjoiOTlmYTYzYjQtNjFmNy00ODUyLThiNDMtMjJlNGY3YzY2MzhkIiwiY3JlYXRldGltZV91dGMiOiIyMDIzLTA3LTAzIDAyOjA1OjMwIiwibmJmIjoxNjg4MzkzMTMwLCJleHAiOjE2ODgzOTY3MzAsImlhdCI6MTY4ODM5MzEzMH0.IJAkDs7l3rEvURHiy06Y2STyuiIu-CYUk5E8en4LU0_mrJ83hKZR1nVqKiAY9ry_6ZmFzVfg-ap_TXTF6GTqihyM-nmEpD2NVWeWZ5VHWVgJif4ezB4YTs0YEpnVzYCk_x4p0wU2GYbqf1BFrNO7PQPMMPDGfaCTUqI_Pe2B0ikXMaN6CDkMho26KVT3DK-xytc6lO92RHvg65Hp3xC1qaonQXdws13wM6WckUmrswItroy9z38hK3w0rQgXOK2mu3o_4zOKLGfq5JpqOCNQCLJgQ0_jFXhMtaz6E_fMZx54fZHfF1YrA-tfs7KFgiYxMb8PnNILoniFrQhvET3y-Q",
@@ -325,9 +325,6 @@ class MHR(BaseDriver):
 
         for i in response["mangaSectionImages"]:
             url = urlparse(base_url + i)
-            url = url._replace(
-                query="key=a89b0c650c44a049836ca1b8159901bf&uk=707970C804232C2908923C36C437DBA3876794ACC882C08B91FCF0617F57F006"
-            )
 
             results.append(urlunparse(url))
 
