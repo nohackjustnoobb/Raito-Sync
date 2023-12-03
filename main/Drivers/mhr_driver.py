@@ -324,7 +324,7 @@ class MHR(BaseDriver):
         results = []
 
         for i in response["mangaSectionImages"]:
-            url = urlparse(base_url + i)
+            url = urlparse(base_url + i + response["query"])
 
             results.append(urlunparse(url))
 
