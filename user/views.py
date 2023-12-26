@@ -158,7 +158,7 @@ class Collections(APIView):
     def delete(self, request, format=None):
         try:
             # try to delete the manga
-            Manga.objects.get(
+            request.user.collections.get(
                 id=request.query_params.get("id"),
                 driver=request.query_params.get("driver"),
             ).delete()

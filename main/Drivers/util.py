@@ -10,7 +10,7 @@ def key(_, urls):
 
 @cached(cache=TTLCache(maxsize=10, ttl=300), key=key)
 def get(session, urls):
-    response = session.get(urls)
+    response = session.get(urls, timeout=5)
     return response.text
 
 

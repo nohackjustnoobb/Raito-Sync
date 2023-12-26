@@ -1,6 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 import requests
 from bs4 import BeautifulSoup
+import re
 
 from .models.driver import BaseDriver
 from .models.manga import Manga, SimpleManga, Chapters, Chapter
@@ -46,6 +47,7 @@ class MHG(BaseDriver):
             return MHG.get_manga(ids[: length // 2]) + MHG.get_manga(ids[length // 2 :])
 
         session = requests.Session()
+        session.cookies.set("isAdult", "1")
 
         def extract_details(id):
             text = cget(session, f"https://tw.manhuagui.com/comic/{id}/")
@@ -77,7 +79,7 @@ class MHG(BaseDriver):
                             chapters.append(
                                 Chapter(
                                     title=j["title"].strip(),
-                                    id=j["href"].replace(id, "")[8:-5],
+                                    id=re.search("\/(\d+)\.html", j["href"]).group(1),
                                 )
                             )
                     return chapters
@@ -134,7 +136,7 @@ class MHG(BaseDriver):
         page = f"index_p{page if page else 1}.html"
 
         response = requests.get(
-            f"https://tw.manhuagui.com/list/{category}{page}",
+            f"https://tw.manhuagui.com/list/{category}{page}", timeout=5
         )
         soup = BeautifulSoup(response.text, "lxml")
 
@@ -173,7 +175,7 @@ class MHG(BaseDriver):
     @staticmethod
     def search(text, page=1):
         response = requests.get(
-            f"https://tw.manhuagui.com/s/{text}_p{page}.html",
+            f"https://tw.manhuagui.com/s/{text}_p{page}.html", timeout=5
         )
         soup = BeautifulSoup(response.text, "lxml")
 
@@ -230,7 +232,7 @@ lz = lzstring.LZString()
 # get.py
 def get(url):
     try:
-        res = requests.get(url)
+        res = requests.get(url, timeout=5)
     except:
         return False
     m = re.match(r"^.*\}\(\'(.*)\',(\d*),(\d*),\'([\w|\+|\/|=]*)\'.*$", res.text)
