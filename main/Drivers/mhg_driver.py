@@ -47,7 +47,6 @@ class MHG(BaseDriver):
             return MHG.get_manga(ids[: length // 2]) + MHG.get_manga(ids[length // 2 :])
 
         session = requests.Session()
-        session.cookies.set("isAdult", "1")
 
         def extract_details(id):
             text = cget(session, f"https://tw.manhuagui.com/comic/{id}/")
@@ -69,7 +68,16 @@ class MHG(BaseDriver):
             ]
             description = soup.find("div", id="intro-cut").text.strip()
 
-            chapter_list = soup.find_all("div", class_="chapter-list")
+            tryAdult = soup.find("input", id="__VIEWSTATE")
+            if tryAdult:
+                chapter_list = BeautifulSoup(
+                    lzstring.LZString().decompressFromBase64(
+                        tryAdult.attrs.get("value")
+                    ),
+                    "lxml",
+                ).find_all("div", class_="chapter-list")
+            else:
+                chapter_list = soup.find_all("div", class_="chapter-list")
 
             def extract_chapter(raw):
                 try:

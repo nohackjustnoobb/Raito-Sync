@@ -173,9 +173,39 @@ class Collections(APIView):
 class Histories(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_histories(self, user, page, date, status):
+        if page:
+            page = int(page)
+
+        if date:
+            date = int(date) / 1e3
+
+        if not (page and page >= 1):
+            page = 1
+
+        histories = user.history
+        if date:
+            histories = histories.filter(
+                update_datetime__gte=datetime.fromtimestamp(date)
+            )
+        count = histories.count()
+        histories = histories.order_by("update_datetime")[(page - 1) * 50 : page * 50]
+
+        serializer = HistorySerializers(histories, many=True)
+
+        return Response(
+            serializer.data,
+            status=status,
+            headers={"Is-Next": "1" if count > page * 50 else "0"},
+        )
+
     def get(self, request, format=None):
-        serializer = HistorySerializers(request.user.history, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return self.get_histories(
+            request.user,
+            request.query_params.get("page"),
+            request.query_params.get("date"),
+            status.HTTP_200_OK,
+        )
 
     def post(self, request, format=None):
         try:
@@ -196,17 +226,12 @@ class Histories(APIView):
                     if serializer.is_valid():
                         request.user.history.add(serializer.save())
 
-            date = request.query_params.get("date")
-            serializer = HistorySerializers(
-                request.user.history.filter(
-                    update_datetime__gte=datetime.fromtimestamp(int(date) / 1e3)
-                )
-                if date
-                else request.user.history,
-                many=True,
+            return self.get_histories(
+                request.user,
+                request.query_params.get("page"),
+                request.query_params.get("date"),
+                status.HTTP_202_ACCEPTED,
             )
-
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
 
         except:
             return Response(

@@ -11,7 +11,7 @@ class serverInfoMiddleware:
         response.headers = {
             **response.headers,
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Expose-Headers": "Version, Available-Drivers",
+            "Access-Control-Expose-Headers": "Version, Available-Drivers, Is-Next",
             "Version": settings.VERSION,
             "Available-Drivers": ",".join(
                 map(lambda x: x.identifier, BetterMangaApp.available_drivers),
