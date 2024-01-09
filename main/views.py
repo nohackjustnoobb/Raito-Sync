@@ -184,7 +184,7 @@ class Chapter(APIView):
             return Response(response, status=status.HTTP_200_OK)
         except DriverNotFound:
             return Response(DriverNotFound.message, status=status.HTTP_404_NOT_FOUND)
-        except:
+        except KeyError:
             return Response(
                 {"error": "An error occurred when trying to get chapters."},
                 status=status.HTTP_400_BAD_REQUEST,
