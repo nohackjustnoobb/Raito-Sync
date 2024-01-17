@@ -1,0 +1,7 @@
+{
+    // Required, this secret key is used to sign the token
+    // Please keep it secret
+    "secretKey": "secret",
+    // Optional, if this is set, user will be required to use this key to register new accounts
+    "registerKey": "registerKey"
+}
