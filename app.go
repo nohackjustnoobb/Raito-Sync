@@ -40,7 +40,5 @@ func main() {
 	routes.SetupUserRoutes(app)
 	routes.SetupSyncRoutes(app)
 
-	// TODO share
-
 	app.Listen(":3000")
 }

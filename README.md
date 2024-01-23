@@ -1,6 +1,6 @@
 # Raito Sync
 
-TODO: description
+This server should not be used alone. Check this repository [Raito-Manga](ttps://github.com/nohackjustnoobb/Raito-Manga.git) for more information.
 
 ## Quick Start
 
