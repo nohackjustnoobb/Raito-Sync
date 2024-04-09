@@ -22,7 +22,8 @@ func SetupSyncRoutes(app *fiber.App) {
 
 	app.Get("/history", getRecords)
 	app.Post("/history", updateRecords)
-	app.Delete("/history", resetRecords)
+	app.Delete("/history", deleteRecord)
+	app.Post("/history/delete", deleteRecords)
 
 	app.Get("/sync", getSync)
 }
@@ -245,7 +246,7 @@ func updateRecords(c *fiber.Ctx) error {
 	return getRecords(c)
 }
 
-func resetRecords(c *fiber.Ctx) error {
+func deleteRecord(c *fiber.Ctx) error {
 	// get info
 	claims := c.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
 	driver := c.Query("driver")
@@ -264,13 +265,58 @@ func resetRecords(c *fiber.Ctx) error {
 	}
 	database.Conn.First(&record)
 
+	// check if the record is in collections
+	collections := []models.Manga{}
+	database.Conn.Where(&models.Manga{
+		UserID: uint(claims["uid"].(float64)),
+		Driver: driver,
+		ID:     id,
+	}).Limit(1).Find(&collections)
+
 	// set the record to nil and save
-	record.ChapterID = nil
-	record.ChapterTitle = nil
-	record.Page = nil
-	database.Conn.Save(&record)
+	if len(collections) != 0 {
+		record.ChapterID = nil
+		record.ChapterTitle = nil
+		record.Page = nil
+		database.Conn.Save(&record)
+	} else {
+		database.Conn.Delete(&record)
+	}
 
 	c.Status(fiber.StatusNoContent)
 	return nil
+}
 
+type RecordId struct {
+	ID     string `json:"id"`
+	Driver string `json:"driver"`
+}
+
+func deleteRecords(c *fiber.Ctx) error {
+	// get info
+	claims := c.Locals("user").(*jwt.Token).Claims.(jwt.MapClaims)
+
+	records := []RecordId{}
+	if err := c.BodyParser(&records); err != nil {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{"error": "Body cannot be parsed."})
+	}
+	convertedRecords := [][]interface{}{}
+	for _, v := range records {
+		convertedRecords = append(convertedRecords, []interface{}{v.ID, v.Driver})
+	}
+
+	// check if records in collections
+	collections := []models.Manga{}
+	database.Conn.Where("user_id = ? AND (id, driver) IN ?", claims["uid"], convertedRecords).Find(&collections)
+	withoutUIDCollection := [][]interface{}{}
+	for _, v := range collections {
+		withoutUIDCollection = append(withoutUIDCollection, []interface{}{v.ID, v.Driver})
+	}
+
+	database.Conn.Where("user_id = ? AND (id, driver) IN ? AND (id, driver) NOT IN ?", claims["uid"], convertedRecords, withoutUIDCollection).Delete(&models.Record{})
+	database.Conn.Model(&models.Record{}).Where("user_id = ? AND (id, driver) IN ? AND (id, driver) IN ?", claims["uid"], convertedRecords, withoutUIDCollection).Updates(map[string]interface{}{"chapter_id": nil, "chapter_title": nil, "page": nil})
+
+	c.Status(fiber.StatusNoContent)
+	return nil
 }

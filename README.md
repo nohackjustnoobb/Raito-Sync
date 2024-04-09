@@ -1,6 +1,6 @@
 # Raito Sync
 
-This server should not be used alone. Check this repository [Raito-Manga](ttps://github.com/nohackjustnoobb/Raito-Manga.git) for more information.
+This server should not be used alone. Check this repository [Raito-Manga](https://github.com/nohackjustnoobb/Raito-Manga) for more information.
 
 ## Quick Start
 
@@ -28,3 +28,25 @@ services:
 ```bash
 sudo docker-compose up -d
 ```
+
+## Manual Setup (Not Recommended)
+
+Make sure that you have `GoLang` installed before setting up.
+
+```bash
+# 1. Clone this repository
+git clone https://github.com/nohackjustnoobb/Raito-Sync.git
+cd Raito-Sync
+
+# 2. Create and Edit the config file
+cp config_template.json config.json
+nano config.json
+
+# 3. Install the dependencies
+go mod download
+
+# 4. Run the server
+go run .
+```
+
+You can execute the commands one by one or copy all of them at once and create a shell script.

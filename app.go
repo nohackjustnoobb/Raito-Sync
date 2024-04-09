@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const version = "0.1.0-beta.0"
+const version = "0.1.0-beta.1"
 
 func main() {
 	// setup fiber app
