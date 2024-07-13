@@ -5,11 +5,12 @@ type Record struct {
 	ID     string `gorm:"primaryKey;autoIncrement:false" json:"id"`
 	Driver string `gorm:"primaryKey;autoIncrement:false" json:"driver"`
 
-	Title     string `json:"title"`
-	Thumbnail string `json:"thumbnail"`
-	Latest    string `json:"latest"`
-	New       bool   `json:"new"`
-	Datetime  uint   `json:"datetime"`
+	Title          string `json:"title"`
+	Thumbnail      string `json:"thumbnail"`
+	Latest         string `json:"latest"`
+	IsUpdated      bool   `json:"isUpdated"`
+	Datetime       uint   `json:"datetime"`
+	UpdateDatetime *uint  `json:"updateDatetime"`
 
 	ChapterID    *string `json:"chapterId"`
 	ChapterTitle *string `json:"chapterTitle"`
