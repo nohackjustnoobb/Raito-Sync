@@ -52,14 +52,39 @@ func getSync(c *fiber.Ctx) error {
 	collectionsHash := md5.Sum([]byte(mangaString))
 
 	// hash only the latest record
-	record := new(models.Record)
-	result := database.Conn.Where("user_id = ? ", user.ID).Order("-datetime").Limit(1).Find(record)
+	dtRecord := new(models.Record)
+	dtResult := database.Conn.Where("user_id = ? ", user.ID).Order("-datetime").Limit(1).Find(dtRecord)
+
+	udtRecord := new(models.Record)
+	udtResult := database.Conn.Where("user_id = ? ", user.ID).Where("update_datetime IS NOT NULL").Order("-update_datetime").Limit(1).Find(udtRecord)
+
+	var record *models.Record
+
+	if dtResult.RowsAffected == 1 && udtResult.RowsAffected == 1 {
+		if dtRecord.Datetime > *udtRecord.UpdateDatetime {
+			record = dtRecord
+		} else {
+			record = udtRecord
+		}
+	} else if dtResult.RowsAffected == 1 {
+		record = dtRecord
+	} else if udtResult.RowsAffected == 1 {
+		record = udtRecord
+	}
+
 	recordString := ""
-	if result.RowsAffected == 1 {
+	if record != nil {
 		recordString += record.Driver
 		recordString += record.ID
-		recordString += strconv.FormatUint(uint64(record.Datetime), 10)
+
+		var datetime uint = record.Datetime
+		if record.UpdateDatetime != nil {
+			datetime = max(record.Datetime, *record.UpdateDatetime)
+		}
+
+		recordString += strconv.FormatUint(uint64(datetime), 10)
 	}
+
 	recordHash := md5.Sum([]byte(recordString))
 
 	// hash settings
@@ -234,7 +259,17 @@ func updateRecords(c *fiber.Ctx) error {
 		result := database.Conn.Limit(1).Find(&prevRecord)
 		if result.RowsAffected == 1 {
 			// only keep the latest one
-			if prevRecord.Datetime < record.Datetime {
+			var prevDatetime uint = prevRecord.Datetime
+			if prevRecord.UpdateDatetime != nil {
+				prevDatetime = max(prevRecord.Datetime, *prevRecord.UpdateDatetime)
+			}
+
+			var datetime uint = record.Datetime
+			if record.UpdateDatetime != nil {
+				datetime = max(record.Datetime, *record.UpdateDatetime)
+			}
+
+			if prevDatetime <= datetime {
 				database.Conn.Save(&record)
 			}
 		} else {
