@@ -1,0 +1,8 @@
+/**
+
+!/database
+!/models
+!/routes
+
+!app.go
+!go.*

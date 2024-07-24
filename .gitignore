@@ -1,7 +1,6 @@
 db.sqlite3
 config.json
 docker-compose.yml
-Raito-Sync
 
 .vscode/
 
