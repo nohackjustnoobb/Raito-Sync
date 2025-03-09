@@ -12,13 +12,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const version = "1.0.0-beta.3"
+const VERSION = "1.0.0"
 
 func main() {
 	// setup fiber app
 	app := fiber.New(fiber.Config{
 		Prefork: true,
-		AppName: "Raito-Sync v" + version,
+		AppName: "Raito-Sync v" + VERSION,
 	})
 
 	// setup logging
@@ -35,7 +35,7 @@ func main() {
 
 	// setup handlers
 	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"version": version})
+		return c.JSON(fiber.Map{"version": VERSION})
 	})
 	routes.SetupUserRoutes(app)
 	routes.SetupSyncRoutes(app)
